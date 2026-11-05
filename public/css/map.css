@@ -1,0 +1,134 @@
+/* Layout Peta & Panel */
+.map-page-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .map-page-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Controls Bar (Search & Selectors) */
+.map-controls {
+  background: var(--white);
+  padding: 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.search-box {
+  position: relative;
+  flex: 1;
+  min-width: 260px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+}
+
+.search-results-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 0 0 var(--radius) var(--radius);
+  box-shadow: var(--shadow);
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 50;
+  display: none;
+}
+
+.search-result-item {
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.2s;
+}
+
+.search-result-item:hover {
+  background: #f1f5f9;
+}
+
+.search-result-item strong {
+  color: var(--primary);
+  display: block;
+}
+
+.search-result-item small {
+  color: var(--text-light);
+}
+
+/* SVG Viewport Container */
+.svg-viewport {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  min-height: 500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+  box-shadow: var(--shadow);
+}
+
+.svg-viewport svg {
+  width: 100%;
+  height: auto;
+  max-height: 600px;
+}
+
+/* Stylings Interaktif untuk Elemen SVG */
+.map-location {
+  cursor: pointer;
+  transition: fill 0.3s ease, stroke 0.3s ease, stroke-width 0.3s ease;
+}
+
+.map-location:hover {
+  fill-opacity: 0.8;
+  stroke: #2563eb !important;
+  stroke-width: 3px !important;
+}
+
+/* State Highlight Otomatis / Aktif */
+.map-location.active {
+  fill: #facc15 !important; /* Warna Kuning Emas */
+  fill-opacity: 0.95 !important;
+  stroke: #2563eb !important; /* Border Biru */
+  stroke-width: 4px !important;
+  filter: drop-shadow(0px 0px 8px rgba(37, 99, 235, 0.6));
+}
+
+/* Panel Informasi Lokasi */
+.location-info-panel {
+  position: sticky;
+  top: 90px;
+}
+
+.info-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  background: #e0e7ff;
+  color: #3730a3;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Administrator OSIS - SMAN 10 Samarinda</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body style="display: flex; justify-content: center; align-items: center; height: 100vh; background: #e2e8f0;">
+  <div class="card" style="width: 100%; max-width: 400px;">
+    <h2 style="text-align: center; color: var(--primary); margin-bottom: 1.5rem;">Login OSIS</h2>
+    <div id="error-msg" style="color: red; font-size: 0.85rem; margin-bottom: 1rem; display: none;"></div>
+    
+    <form id="login-form">
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; margin-bottom: 0.4rem; font-weight: 500;">Username</label>
+        <input type="text" id="username" required style="width: 100%; padding: 0.6rem; border: 1px solid var(--border); border-radius: var(--radius);">
+      </div>
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; margin-bottom: 0.4rem; font-weight: 500;">Password</label>
+        <input type="password" id="password" required style="width: 100%; padding: 0.6rem; border: 1px solid var(--border); border-radius: var(--radius);">
+      </div>
+      <button type="submit" class="btn" style="width: 100%;">Masuk Dashboard</button>
+    </form>
+    <div style="text-align: center; margin-top: 1rem;">
+      <a href="/" style="font-size: 0.85rem; color: var(--text-light); text-decoration: none;">&larr; Kembali ke Beranda</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const errorDiv = document.getElementById('error-msg');
+
+      try {
+        const response = await fetch('/api/admin/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const result = await response.json();
+
+        if (result.success) {
+          window.location.href = '/admin/dashboard.html';
+        } else {
+          errorDiv.style.display = 'block';
+          errorDiv.innerText = result.message || 'Login gagal.';
+        }
+      } catch (err) {
+        errorDiv.style.display = 'block';
+        errorDiv.innerText = 'Terjadi kesalahan pada server.';
+      }
+    });
+  </script>
+</body>
+</html>

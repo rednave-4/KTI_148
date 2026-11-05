@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Informasi & Denah Interaktif SMAN 10 Samarinda</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="/" class="nav-brand">SMAN 10 Samarinda</a>
+    <ul class="nav-links">
+      <li><a href="/" class="active">Beranda</a></li>
+      <li><a href="/announcements.html">Pengumuman</a></li>
+      <li><a href="/map.html">Denah Sekolah</a></li>
+      <li><a href="/admin/login.html">Login OSIS</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero Section -->
+  <header style="background: linear-gradient(rgba(30,58,138,0.85), rgba(30,58,138,0.85)), url('/assets/images/hero-bg.jpg') center/cover; color: white; padding: 5rem 2rem; text-align: center;">
+    <div style="max-width: 800px; margin: auto;">
+      <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Sistem Informasi & Denah Interaktif SMAN 10 Samarinda</h1>
+      <p style="font-size: 1.1rem; margin-bottom: 2rem; opacity: 0.9;">Pusat informasi kegiatan sekolah terkini dan navigasi denah lingkungan sekolah berbasis SVG.</p>
+      <div style="display: flex; gap: 1rem; justify-content: center;">
+        <a href="/announcements.html" class="btn">Lihat Pengumuman</a>
+        <a href="/map.html" class="btn btn-secondary" style="background: white; color: var(--primary);">Buka Denah Sekolah</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <section style="margin-bottom: 3rem;">
+      <h2 style="margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem;">Pengumuman Terbaru</h2>
+      <div id="latest-announcements-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+        <p style="color: var(--text-light);">Memuat pengumuman...</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2026 SMAN 10 Samarinda - KTI: Sistem Informasi Pengumuman & Wayfinding SVG.</p>
+  </footer>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>

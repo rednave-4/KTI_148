@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Denah Interaktif Sekolah - SMAN 10 Samarinda</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/map.css">
+</head>
+<body>
+  <!-- Navbar Header -->
+  <nav class="navbar">
+    <a href="/" class="nav-brand">SMAN 10 Samarinda</a>
+    <ul class="nav-links">
+      <li><a href="/">Beranda</a></li>
+      <li><a href="/announcements.html">Pengumuman</a></li>
+      <li><a href="/map.html" class="active">Denah Sekolah</a></li>
+      <li><a href="/admin/login.html">Login OSIS</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
+    <h1 style="color: var(--primary); margin-bottom: 0.5rem;">Denah & Navigasi Lokasi Sekolah</h1>
+    <p style="color: var(--text-light); margin-bottom: 1.5rem;">Cari ruangan, pilih gedung/lantai, atau klik langsung pada area denah interaktif di bawah ini.</p>
+
+    <!-- Map Controls & Search -->
+    <div class="map-controls">
+      <div class="search-box">
+        <input type="text" id="map-search-input" placeholder="🔍 Cari nama gedung, laboratorium, atau ruangan..." autocomplete="off">
+        <div id="search-results" class="search-results-dropdown"></div>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <label for="map-select" style="font-size: 0.9rem; font-weight: 600;">Tampilan Denah:</label>
+        <select id="map-select" style="padding: 0.55rem; border: 1px solid var(--border); border-radius: var(--radius);">
+          <option value="campus" data-svg="/assets/maps/campus.svg">Denah Kampus Utama</option>
+          <option value="building-a-floor-1" data-svg="/assets/maps/building-a-floor-1.svg">Gedung A - Lantai 1</option>
+          <option value="building-a-floor-2" data-svg="/assets/maps/building-a-floor-2.svg">Gedung A - Lantai 2</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Main Map Layout -->
+    <div class="map-page-layout">
+      <!-- Container Penampung SVG -->
+      <div class="svg-viewport" id="svg-container">
+        <p style="color: var(--text-light);">Memuat peta SVG...</p>
+      </div>
+
+      <!-- Panel Informasi Detail Lokasi -->
+      <div class="card location-info-panel" id="info-panel">
+        <span class="info-badge" id="info-type">PETUNJUK</span>
+        <h3 id="info-title" style="color: var(--primary); margin-bottom: 0.5rem;">Pilih Lokasi</h3>
+        <p id="info-description" style="color: var(--text-light); font-size: 0.95rem; margin-bottom: 1rem;">
+          Klik pada ruangan/gedung di denah atau gunakan pencarian di atas untuk melihat detail informasi lokasi.
+        </p>
+        <div id="info-extra"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 SMAN 10 Samarinda - KTI: Sistem Informasi Pengumuman & Wayfinding SVG.</p>
+  </footer>
+
+  <script src="/js/map.js"></script>
+</body>
+</html>
