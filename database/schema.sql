@@ -46,6 +46,12 @@ CREATE TABLE IF NOT EXISTS locations (
   INDEX idx_locations_name (name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+INSERT IGNORE INTO locations (location_id, parent_location_id, name, location_type, description, sort_order) VALUES
+(1, NULL, 'SMA Negeri 10 Samarinda', 'SCHOOL', 'Komplek Utama Sekolah', 1),
+(2, 1, 'Gedung Utama / Kantor', 'BUILDING', 'Ruang Kepala Sekolah dan Tata Usaha', 2),
+(3, 1, 'Gedung Kelas Belajar', 'BUILDING', 'Area Kegiatan Belajar Mengajar (KBM)', 3),
+(4, 1, 'Aula Serbaguna', 'FACILITY', 'Tempat Acara / Pertemuan Besar', 4);
+
 -- =====================================================
 -- 3. Tabel announcements
 -- =====================================================
@@ -123,8 +129,8 @@ CREATE TABLE IF NOT EXISTS map_elements (
 -- =====================================================
 -- Seed Data untuk Tabel locations (Contoh Lokasi SMAN 10 Samarinda)
 -- =====================================================
-INSERT IGNORE INTO locations (location_id, parent_location_id, name, location_type, description, sort_order) VALUES
-(1, NULL, 'SMA Negeri 10 Samarinda', 'SCHOOL', 'Komplek Utama Sekolah', 1),
-(2, 1, 'Gedung Utama / Kantor', 'BUILDING', 'Ruang Kepala Sekolah dan Tata Usaha', 2),
-(3, 1, 'Gedung Kelas Belajar', 'BUILDING', 'Area Kegiatan Belajar Mengajar (KBM)', 3),
-(4, 1, 'Aula Serbaguna', 'FACILITY', 'Tempat Acara / Pertemuan Besar', 4);
+-- INSERT IGNORE INTO locations (location_id, parent_location_id, name, location_type, description, sort_order) VALUES
+-- (1, NULL, 'SMA Negeri 10 Samarinda', 'SCHOOL', 'Komplek Utama Sekolah', 1),
+-- (2, 1, 'Gedung Utama / Kantor', 'BUILDING', 'Ruang Kepala Sekolah dan Tata Usaha', 2),
+-- (3, 1, 'Gedung Kelas Belajar', 'BUILDING', 'Area Kegiatan Belajar Mengajar (KBM)', 3),
+-- (4, 1, 'Aula Serbaguna', 'FACILITY', 'Tempat Acara / Pertemuan Besar', 4);
