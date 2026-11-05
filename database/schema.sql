@@ -3,11 +3,8 @@
 -- Database Schema - SMA Negeri 10 Samarinda
 -- =====================================================
 
-CREATE DATABASE IF NOT EXISTS school_information
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_unicode_ci;
-
-USE school_information;
+-- (Catatan: Baris CREATE DATABASE & USE dihapus agar langsung mengeksekusi 
+--  tabel ke database aktif yang disediakan oleh Railway)
 
 -- =====================================================
 -- 1. Tabel admins
