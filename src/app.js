@@ -16,16 +16,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Session Management
+app.set('trust proxy', 1);
 app.use(session({
-  name: 'sid',
-  secret: process.env.SESSION_SECRET || 'rahasia_sementara',
+  secret: process.env.SESSION_SECRET || 'rahasia_sekolah_123',
   resave: false,
   saveUninitialized: false,
+  proxy: true, // PENTING: Agar Railway membaca protokol HTTPS dari proxy
   cookie: {
+    secure: process.env.NODE_ENV === 'production', // true jika di Railway (HTTPS)
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 1000 * 60 * 60 * 8 // 8 Jam
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' wajib jika frontend dan backend terpisah atau menggunakan HTTPS Railway
+    maxAge: 24 * 60 * 60 * 1000 // 1 hari
   }
 }));
 
