@@ -22,10 +22,9 @@ CREATE TABLE IF NOT EXISTS admins (
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Masukkan admin default dengan password 'evanganteng' yang sudah di-hash dengan argon2
-INSERT IGNORE INTO admins (username, password_hash, full_name) 
-VALUES ('admin', '$argon2id$v=19$m=65536,t=3,p=1$YTF2RzRoV2RjS053M2F6Mg$$argon2id$v=19$m=65536,t=3,p=4$tyguG14rc+qzLFHWoV57FQ$c3KWwTYMdABGSEgfRiA7/ZfrcHZKoqrsByDi5ySi3pY
-', 'Administrator SMAN 10');
+-- Gunakan REPLACE INTO agar jika username 'admin' sudah ada, datanya ditimpa/diperbarui
+REPLACE INTO admins (username, password_hash, full_name) 
+VALUES ('admin', '$argon2id$v=19$m=65536,t=3,p=4$tyguG14rc+qzLFHWoV57FQ$c3KWwTYMdABGSEgfRiA7/ZfrcHZKoqrsByDi5ySi3pY', 'Administrator SMAN 10');
 
 -- =====================================================
 -- 2. Tabel locations (Hierarki)
