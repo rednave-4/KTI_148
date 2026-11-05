@@ -1,21 +1,20 @@
 const fs = require('fs');
 const path = require('path');
-const db = require('./database'); // Sesuaikan jalur file koneksi database Anda jika berbeda
+const db = require('./database');
 
 async function initializeDatabase() {
   try {
-    // Cari letak file schema.sql (asumsi berada di root proyek atau folder src/config)
-    // Sesuaikan path jika file schema.sql Anda berada di tempat lain
-    const schemaPath = path.resolve(__dirname, '../../schema.sql'); 
+    // Sesuaikan path karena schema.sql berada di dalam folder database/schema.sql
+    const schemaPath = path.resolve(__dirname, '../../database/schema.sql'); 
 
     if (!fs.existsSync(schemaPath)) {
-      console.log('⚠️ File schema.sql tidak ditemukan, melewati inisialisasi otomatis.');
+      console.log('⚠️ File schema.sql tidak ditemukan di folder database/, melewati inisialisasi.');
       return;
     }
 
     const schemaSql = fs.readFileSync(schemaPath, 'utf8');
 
-    // Pisahkan query berdasarkan titik koma (;) agar bisa dieksekusi satu per satu
+    // Pisahkan query berdasarkan titik koma (;)
     const queries = schemaSql
       .split(';')
       .map(q => q.trim())
