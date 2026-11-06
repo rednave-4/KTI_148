@@ -53,6 +53,9 @@ app.get('/api/health', (req, res) => {
 // Static Files (Frontend HTML, CSS, JS, SVG maps, Uploads)
 app.use(express.static(path.join(__dirname, '../public')));
 
+// Static Files untuk Folder Uploads (PENTING agar foto bisa diakses publik)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // Fallback Route untuk Frontend SPA / Root
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
