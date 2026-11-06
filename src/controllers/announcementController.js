@@ -9,7 +9,7 @@ exports.getPublicAnnouncements = async (req, res, next) => {
              l.location_id, l.name AS location_name
       FROM announcements a
       LEFT JOIN locations l ON a.location_id = l.location_id
-      WHERE a.status = 'PUBLISHED'
+      WHERE LOWER(a.status) = 'published'
       ORDER BY a.published_at DESC
     `);
 
@@ -68,7 +68,7 @@ exports.createAnnouncement = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Judul, deskripsi, tanggal, dan waktu mulai wajib diisi.' });
     }
 
-    const annStatus = status || 'DRAFT';
+    const annStatus = status ? status.toLowerCase() : 'published'; // sesuaikan dengan enum schema.sql
     const published_at = annStatus === 'PUBLISHED' ? new Date() : null;
 
     const [result] = await pool.execute(`
@@ -127,7 +127,7 @@ exports.updateStatus = async (req, res, next) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    if (!['DRAFT', 'PUBLISHED', 'ARCHIVED'].includes(status)) {
+    if (!['draft', 'published', 'archived'].includes(status.toLowerCase())) {
       return res.status(400).json({ success: false, message: 'Status tidak valid.' });
     }
 
