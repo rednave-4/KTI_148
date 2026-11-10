@@ -45,6 +45,7 @@
     <p>&copy; TIM KTI - 148: Jonathan Doxan P. ; Raphael Evander L.R. ; Zacky Ayyatullah</p>
   </footer>
 
+  <!-- Pastikan file main.js diletakkan SEBELUM skrip toggle tema -->
   <script src="/js/main.js"></script>
 
   <!-- Tombol Toggle Tema Melayang di Pojok Kanan Bawah -->
@@ -53,23 +54,22 @@
   </button>
 
   <script>
-    // Pastikan inisialisasi hanya dilakukan sekali dengan aman
-    if (typeof currentTheme === 'undefined') {
-      window.currentTheme = localStorage.getItem('theme') || 'light';
-      if (window.currentTheme === 'dark') {
+    // Skrip mandiri yang aman dan langsung merespons klik
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      if (savedTheme === 'dark') {
         document.documentElement.classList.add('dark');
       }
-    }
 
-    const themeToggleBtn = document.getElementById('theme-toggle');
-    if (themeToggleBtn && !themeToggleBtn.dataset.listenerAttached) {
-      themeToggleBtn.dataset.listenerAttached = "true";
-      themeToggleBtn.addEventListener('click', () => {
-        document.documentElement.classList.toggle('dark');
-        let theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-        localStorage.setItem('theme', theme);
-      });
-    }
+      const toggleBtn = document.getElementById('theme-toggle');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+          document.documentElement.classList.toggle('dark');
+          const activeTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+          localStorage.setItem('theme', activeTheme);
+        });
+      }
+    });
   </script>
 </body>
 </html>
