@@ -1,2 +1,5 @@
 node_modules/
 .env
+*.log
+public/uploads/posters/*
+!public/uploads/posters/.gitkeep
