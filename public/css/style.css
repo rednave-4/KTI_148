@@ -118,3 +118,22 @@ footer {
 .floating-theme-btn:hover {
   transform: scale(1.1);
 }
+
+/* Styling Dasar untuk Dark Mode */
+html.dark body {
+  background-color: #0f172a; /* Warna latar belakang gelap */
+  color: #f8fafc; /* Warna teks terang */
+}
+
+html.dark .navbar {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+html.dark .card, 
+html.dark div[style*="background: white"], 
+html.dark div[style*="background: #fff"] {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
