@@ -50,3 +50,24 @@ function escapeHtml(text) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
+
+// Cek preferensi tema sebelumnya di localStorage
+const currentTheme = localStorage.getItem('theme') || 'light';
+if (currentTheme === 'dark') {
+  document.documentElement.classList.add('dark');
+}
+
+// Event listener untuk tombol toggle
+const themeToggleBtn = document.getElementById('theme-toggle');
+if (themeToggleBtn) {
+  themeToggleBtn.addEventListener('click', () => {
+    document.documentElement.classList.toggle('dark');
+    
+    // Simpan preferensi ke localStorage
+    let theme = 'light';
+    if (document.documentElement.classList.contains('dark')) {
+      theme = 'dark';
+    }
+    localStorage.setItem('theme', theme);
+  });
+}

@@ -1,16 +1,23 @@
 const pool = require('../config/database');
 
-// --- ENDPOINT PUBLIK ---
+// --- ENDPOINT PUBLIK (Dengan Deteksi Otomatis Status Done) ---
 exports.getPublicAnnouncements = async (req, res, next) => {
   try {
     const [rows] = await pool.execute(`
       SELECT a.announcement_id, a.title, a.slug, a.description, a.event_date,
              a.start_time, a.end_time, a.image_path, a.published_at,
-             l.location_id, l.name AS location_name
+             l.location_id, l.name AS location_name,
+             CASE 
+               WHEN a.status = 'published' AND CONCAT(a.event_date, ' ', COALESCE(a.end_time, a.start_time)) < NOW() 
+               THEN 'done'
+               ELSE a.status
+             END AS computed_status
       FROM announcements a
       LEFT JOIN locations l ON a.location_id = l.location_id
-      WHERE LOWER(a.status) = 'published'
-      ORDER BY a.published_at DESC
+      WHERE a.status IN ('published', 'done')
+      ORDER BY 
+        CASE WHEN CONCAT(a.event_date, ' ', COALESCE(a.end_time, a.start_time)) < NOW() THEN 1 ELSE 0 END ASC,
+        a.published_at DESC
     `);
 
     return res.json({ success: true, count: rows.length, data: rows });
