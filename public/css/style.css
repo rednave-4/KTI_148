@@ -119,21 +119,53 @@ footer {
   transform: scale(1.1);
 }
 
-/* Styling Dasar untuk Dark Mode */
+/* ===== DARK MODE ===== */
 html.dark body {
-  background-color: #0f172a; /* Warna latar belakang gelap */
-  color: #f8fafc; /* Warna teks terang */
+  background-color: #0f172a;
+  color: #f8fafc;
 }
 
 html.dark .navbar {
   background-color: #1e293b !important;
   color: #f8fafc !important;
+  border-color: #334155 !important;
 }
 
-html.dark .card, 
-html.dark div[style*="background: white"], 
+html.dark .card,
+html.dark .modal-content,
+html.dark div[style*="background: white"],
 html.dark div[style*="background: #fff"] {
   background-color: #1e293b !important;
   color: #f8fafc !important;
   border-color: #334155 !important;
+}
+
+/* Khusus untuk tabel & form di Admin Dashboard */
+html.dark table,
+html.dark th,
+html.dark td {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+html.dark th {
+  background-color: #334155 !important;
+}
+
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #475569 !important;
+}
+
+html.dark .btn-secondary {
+  background-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .floating-theme-btn:hover {
+  transform: scale(1.1);
 }
