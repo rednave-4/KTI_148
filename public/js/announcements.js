@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <p style="font-size: 0.95rem; margin-bottom: 1.5rem; color: inherit;">
             ${item.description ? item.description.substring(0, 100) + '...' : ''}
           </p>
-          <a href="/announcement-detail.html?slug=${item.slug || item.announcement_id}" class="btn" style="display: inline-block; font-size: 0.85rem; padding: 0.5rem 1rem; text-decoration: none; border-radius: 6px; background: #2563eb; color: white;">
+          <a href="/announcement-detail.html?id=${item.announcement_id}" class="btn" style="display: inline-block; font-size: 0.85rem; padding: 0.5rem 1rem; text-decoration: none; border-radius: 6px; background: #2563eb; color: white;">
             Baca Selengkapnya
           </a>
         </div>
