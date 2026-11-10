@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const locationController = require('../controllers/locationController');
 
-router.get('/locations', locationController.getLocations);
-router.get('/locations/search', locationController.searchLocations);
-router.get('/locations/:id', locationController.getLocationById);
-router.get('/locations/:id/navigation', locationController.getNavigationData);
+// Karena sudah di-mount di /api/locations, path di sini harus relatif
+router.get('/', locationController.getLocations);
+router.get('/search', locationController.searchLocations);
+router.get('/:id', locationController.getLocationById);
+router.get('/:id/navigation', locationController.getNavigationData);
 
 module.exports = router;

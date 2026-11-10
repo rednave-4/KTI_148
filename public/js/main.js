@@ -7,7 +7,7 @@ async function fetchLatestAnnouncements() {
   if (!container) return;
 
   try {
-    const response = await fetch('/api/public/announcements');
+    const response = await fetch('/api/announcements');
     const result = await response.json();
 
     if (result.success && result.data.length > 0) {

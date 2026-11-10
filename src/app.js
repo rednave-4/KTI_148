@@ -35,10 +35,9 @@ const authRoutes = require('./routes/authRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
 const locationRoutes = require('./routes/locationRoutes');
 
-// Daftarkan router ke aplikasi dengan jalur yang eksplisit
-app.use('/api/admin/auth', authRoutes); // contoh: /api/admin/auth/login
-app.use('/api/announcements', announcementRoutes); // menjadi: /api/announcements (untuk publik & admin)
-app.use('/api/locations', locationRoutes);         // menjadi: /api/locations
+app.use('/api/admin/auth', authRoutes);
+app.use('/api/announcements', announcementRoutes);
+app.use('/api/locations', locationRoutes);
 // ====================================================
 
 // Health Check Endpoint

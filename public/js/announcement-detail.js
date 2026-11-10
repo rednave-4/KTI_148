@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function fetchAnnouncementDetail(id) {
   const container = document.getElementById('detail-container');
   try {
-    const response = await fetch(`/api/public/announcements/${id}`);
+    const response = await fetch(`/api/announcements/${id}`);
     const result = await response.json();
 
     if (result.success) {
