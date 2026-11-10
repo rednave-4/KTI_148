@@ -6,7 +6,6 @@
   <title>Login Admin - SMARIDASA</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
-    /* Styling Satu Halaman Penuh yang Responsif terhadap Dark Mode */
     body {
       margin: 0;
       padding: 0;
@@ -14,15 +13,14 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background-color: #f1f5f9; /* Background Light Mode (Satu Halaman) */
+      background-color: #f1f5f9;
       color: #1e293b;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    /* Ketika Dark Mode Aktif pada tag <html> */
     html.dark body {
-      background-color: #0f172a; /* Background Dark Mode (Satu Halaman Penuh) */
+      background-color: #0f172a;
       color: #f8fafc;
     }
 
@@ -31,13 +29,13 @@
       max-width: 420px;
       padding: 2.5rem;
       border-radius: 12px;
-      background-color: #ffffff; /* Kotak Login Light Mode */
+      background-color: #ffffff;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
       transition: background-color 0.3s ease, box-shadow 0.3s ease;
     }
 
     html.dark .login-card {
-      background-color: #1e293b; /* Kotak Login Dark Mode */
+      background-color: #1e293b;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
     }
 
@@ -105,6 +103,11 @@
       background-color: #1d4ed8;
     }
 
+    .btn-login:disabled {
+      background-color: #94a3b8;
+      cursor: not-allowed;
+    }
+
     .back-link {
       display: block;
       text-align: center;
@@ -112,7 +115,6 @@
       font-size: 0.9rem;
       color: #64748b;
       text-decoration: none;
-      transition: color 0.2s;
     }
 
     html.dark .back-link {
@@ -122,14 +124,30 @@
     .back-link:hover {
       color: #2563eb;
     }
+
+    .error-message {
+      background-color: #fee2e2;
+      color: #991b1b;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.25rem;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    html.dark .error-message {
+      background-color: #7f1d1d;
+      color: #fecaca;
+    }
   </style>
 </head>
 <body>
 
   <div class="login-card">
     <h2 class="login-title">Login Admin</h2>
-    
-    <!-- Form Login Anda -->
+
+    <div id="error-message" class="error-message"></div>
+
     <form id="login-form">
       <div class="form-group">
         <label for="username">Username</label>
@@ -141,19 +159,19 @@
         <input type="password" id="password" name="password" placeholder="••••••••••••" required autocomplete="current-password">
       </div>
 
-      <button type="submit" class="btn-login">Masuk Dashboard</button>
+      <button type="submit" class="btn-login" id="login-btn">Masuk Dashboard</button>
     </form>
 
     <a href="/" class="back-link">&larr; Kembali ke Beranda</a>
   </div>
 
-  <!-- Tombol Toggle Tema Melayang di Pojok Kanan Bawah -->
-  <button id="theme-toggle" class="floating-theme-btn" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 16px; border-radius: 50px; background-color: #1e293b; color: #f8fafc; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.2s;">
+  <!-- Tombol Toggle Tema -->
+  <button id="theme-toggle" class="floating-theme-btn" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 16px; border-radius: 50px; background-color: #1e293b; color: #f8fafc; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
     🌙 / ☀️
   </button>
 
   <script>
-    // Inisialisasi Tema Otomatis
+    // Theme Toggle
     document.addEventListener("DOMContentLoaded", () => {
       const savedTheme = localStorage.getItem('theme') || 'light';
       if (savedTheme === 'dark') {
@@ -168,6 +186,51 @@
           localStorage.setItem('theme', activeTheme);
         });
       }
+
+      // Login Logic
+      const form = document.getElementById('login-form');
+      const errorBox = document.getElementById('error-message');
+      const loginBtn = document.getElementById('login-btn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+
+        errorBox.style.display = 'none';
+        errorBox.textContent = '';
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Memproses...';
+
+        try {
+          const res = await fetch('/api/admin/auth/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+          });
+
+          const result = await res.json();
+
+          if (result.success) {
+            // Login berhasil → arahkan ke dashboard
+            window.location.href = '/admin/dashboard.html';
+          } else {
+            errorBox.textContent = result.message || 'Username atau password salah.';
+            errorBox.style.display = 'block';
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Masuk Dashboard';
+          }
+        } catch (err) {
+          console.error(err);
+          errorBox.textContent = 'Gagal terhubung ke server. Coba lagi.';
+          errorBox.style.display = 'block';
+          loginBtn.disabled = false;
+          loginBtn.textContent = 'Masuk Dashboard';
+        }
+      });
     });
   </script>
 </body>
