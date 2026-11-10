@@ -35,7 +35,7 @@ exports.getPublicAnnouncementById = async (req, res, next) => {
              l.location_id, l.name AS location_name, l.parent_location_id
       FROM announcements a
       LEFT JOIN locations l ON a.location_id = l.location_id
-      WHERE a.announcement_id = ? AND a.status = 'PUBLISHED'
+      WHERE a.announcement_id = ? AND a.status = 'published'
     `, [id]);
 
     if (rows.length === 0) {
