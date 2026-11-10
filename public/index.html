@@ -53,24 +53,20 @@
   </button>
 
   <script>
-    // 1. Cek preferensi tema yang tersimpan saat halaman dimuat
-    const currentTheme = localStorage.getItem('theme') || 'light';
-    if (currentTheme === 'dark') {
-      document.documentElement.classList.add('dark');
+    // Pastikan inisialisasi hanya dilakukan sekali dengan aman
+    if (typeof currentTheme === 'undefined') {
+      window.currentTheme = localStorage.getItem('theme') || 'light';
+      if (window.currentTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
     }
 
-    // 2. Fungsi saat tombol diklik
     const themeToggleBtn = document.getElementById('theme-toggle');
-    if (themeToggleBtn) {
+    if (themeToggleBtn && !themeToggleBtn.dataset.listenerAttached) {
+      themeToggleBtn.dataset.listenerAttached = "true";
       themeToggleBtn.addEventListener('click', () => {
-        // Toggle class 'dark' pada tag root (<html>)
         document.documentElement.classList.toggle('dark');
-        
-        // Simpan status pilihan ke localStorage
-        let theme = 'light';
-        if (document.documentElement.classList.contains('dark')) {
-          theme = 'dark';
-        }
+        let theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
         localStorage.setItem('theme', theme);
       });
     }
