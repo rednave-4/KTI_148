@@ -114,3 +114,7 @@ footer {
   color: var(--text-light);
   font-size: 0.9rem;
 }
+
+.floating-theme-btn:hover {
+  transform: scale(1.1);
+}
