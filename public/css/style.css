@@ -119,53 +119,204 @@ footer {
   transform: scale(1.1);
 }
 
-/* ===== DARK MODE ===== */
+/* =========================================
+   DARK MODE — Keselarasan Penuh
+   ========================================= */
+
+/* Latar & Teks Utama */
 html.dark body {
   background-color: #0f172a;
-  color: #f8fafc;
+  color: #e2e8f0;
 }
 
+/* Navbar */
 html.dark .navbar {
   background-color: #1e293b !important;
-  color: #f8fafc !important;
-  border-color: #334155 !important;
+  border-bottom: 1px solid #334155 !important;
+  color: #f1f5f9 !important;
 }
 
+html.dark .nav-brand {
+  color: #60a5fa !important;
+}
+
+html.dark .nav-links a {
+  color: #cbd5e1 !important;
+}
+
+html.dark .nav-links a:hover,
+html.dark .nav-links a.active {
+  color: #93c5fd !important;
+}
+
+/* Card & Container */
 html.dark .card,
 html.dark .modal-content,
+html.dark .login-card,
+html.dark .admin-form,
+html.dark .location-info-panel,
 html.dark div[style*="background: white"],
-html.dark div[style*="background: #fff"] {
+html.dark div[style*="background: #fff"],
+html.dark div[style*="background:#fff"] {
   background-color: #1e293b !important;
-  color: #f8fafc !important;
+  color: #e2e8f0 !important;
   border-color: #334155 !important;
 }
 
-/* Khusus untuk tabel & form di Admin Dashboard */
-html.dark table,
-html.dark th,
-html.dark td {
+/* Judul & Teks */
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark .card-title,
+html.dark .detail-title {
+  color: #93c5fd !important;
+}
+
+html.dark p,
+html.dark .card-desc,
+html.dark .card-meta,
+html.dark .card-footer,
+html.dark .text-light,
+html.dark [style*="color: var(--text-light)"] {
+  color: #94a3b8 !important;
+}
+
+/* Tabel (Admin) */
+html.dark table {
   background-color: #1e293b !important;
-  color: #f8fafc !important;
+  color: #e2e8f0 !important;
   border-color: #334155 !important;
 }
 
 html.dark th {
   background-color: #334155 !important;
+  color: #f1f5f9 !important;
+  border-color: #475569 !important;
 }
 
+html.dark td {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+  border-color: #334155 !important;
+}
+
+/* Form Elements */
 html.dark input,
 html.dark textarea,
 html.dark select {
   background-color: #0f172a !important;
-  color: #f8fafc !important;
-  border-color: #475569 !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #475569 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+html.dark input:focus,
+html.dark textarea:focus,
+html.dark select:focus {
+  border-color: #3b82f6 !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+html.dark label {
+  color: #cbd5e1 !important;
+}
+
+/* Tombol */
+html.dark .btn {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+html.dark .btn:hover {
+  background-color: #1d4ed8 !important;
 }
 
 html.dark .btn-secondary {
+  background-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+html.dark .btn-secondary:hover {
+  background-color: #475569 !important;
+}
+
+html.dark .btn-danger,
+html.dark button[style*="background: #fee2e2"] {
+  background-color: #7f1d1d !important;
+  color: #fecaca !important;
+}
+
+/* Badge / Status */
+html.dark .status-badge,
+html.dark .info-badge,
+html.dark span[style*="background"] {
+  /* biarkan warna badge tetap kontras */
+}
+
+/* Footer */
+html.dark footer {
+  background-color: #1e293b !important;
+  border-top: 1px solid #334155 !important;
+  color: #94a3b8 !important;
+}
+
+/* Map Page */
+html.dark .map-controls,
+html.dark .svg-viewport,
+html.dark .search-results-dropdown {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+html.dark .search-result-item {
+  border-bottom-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+html.dark .search-result-item:hover {
+  background-color: #334155 !important;
+}
+
+html.dark .search-result-item strong {
+  color: #93c5fd !important;
+}
+
+html.dark .search-result-item small {
+  color: #94a3b8 !important;
+}
+
+/* Modal Overlay tetap gelap */
+html.dark .modal {
+  background: rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Tombol Theme */
+html.dark .floating-theme-btn {
   background-color: #334155 !important;
   color: #f8fafc !important;
 }
 
 html.dark .floating-theme-btn:hover {
-  transform: scale(1.1);
+  transform: scale(1.08);
+}
+
+/* Link */
+html.dark a {
+  color: #93c5fd;
+}
+
+html.dark a:hover {
+  color: #bfdbfe;
+}
+
+/* Empty state & pesan error */
+html.dark .empty-state,
+html.dark .error-message {
+  color: #fca5a5 !important;
 }
