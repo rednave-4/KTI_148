@@ -13,12 +13,12 @@ router.get('/:id', announcementController.getPublicAnnouncementById);
 
 // ======================
 // ADMIN ENDPOINTS
-// (akan di-mount di /api/admin/announcements)
+// Prefix: /api/announcements/admin
 // ======================
-router.get('/', requireAdmin, announcementController.getAdminAnnouncements);
-router.post('/', requireAdmin, upload.single('poster'), announcementController.createAnnouncement);
-router.put('/:id', requireAdmin, upload.single('poster'), announcementController.updateAnnouncement);
-router.patch('/:id/status', requireAdmin, announcementController.updateStatus);
-router.delete('/:id', requireAdmin, announcementController.deleteAnnouncement);
+router.get('/admin/list', requireAdmin, announcementController.getAdminAnnouncements);
+router.post('/admin', requireAdmin, upload.single('poster'), announcementController.createAnnouncement);
+router.put('/admin/:id', requireAdmin, upload.single('poster'), announcementController.updateAnnouncement);
+router.patch('/admin/:id/status', requireAdmin, announcementController.updateStatus);
+router.delete('/admin/:id', requireAdmin, announcementController.deleteAnnouncement);
 
 module.exports = router;
