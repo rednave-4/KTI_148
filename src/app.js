@@ -18,14 +18,14 @@ app.use(express.urlencoded({ extended: true }));
 // Session Management
 app.set('trust proxy', 1);
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'rahasia_sekolah_123',
+  secret: process.env.SESSION_SESSION_SECRET || process.env.SESSION_SECRET || 'rahasia_sekolah_123',
   resave: false,
   saveUninitialized: false,
   proxy: true, // PENTING: Agar Railway membaca protokol HTTPS dari proxy
   cookie: {
     secure: process.env.NODE_ENV === 'production', // true jika di Railway (HTTPS)
     httpOnly: true,
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' wajib jika frontend dan backend terpisah atau menggunakan HTTPS Railway
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: 24 * 60 * 60 * 1000 // 1 hari
   }
 }));
@@ -35,10 +35,10 @@ const authRoutes = require('./routes/authRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
 const locationRoutes = require('./routes/locationRoutes');
 
-// Daftarkan router ke aplikasi
-app.use('/api/admin/auth', authRoutes); // /api/admin/auth/login, /logout, /me
-app.use('/api', announcementRoutes);    // /api/public/announcements & /api/admin/announcements
-app.use('/api', locationRoutes);        // /api/locations, /api/locations/search, dll.
+// Daftarkan router ke aplikasi dengan jalur yang eksplisit
+app.use('/api/admin/auth', authRoutes); // contoh: /api/admin/auth/login
+app.use('/api/announcements', announcementRoutes); // menjadi: /api/announcements (untuk publik & admin)
+app.use('/api/locations', locationRoutes);         // menjadi: /api/locations
 // ====================================================
 
 // Health Check Endpoint
