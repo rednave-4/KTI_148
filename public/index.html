@@ -46,10 +46,34 @@
   </footer>
 
   <script src="/js/main.js"></script>
-  
+
   <!-- Tombol Toggle Tema Melayang di Pojok Kanan Bawah -->
   <button id="theme-toggle" class="floating-theme-btn" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 16px; border-radius: 50px; background-color: #1e293b; color: #f8fafc; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.2s;">
     🌙 / ☀️
   </button>
+
+  <script>
+    // 1. Cek preferensi tema yang tersimpan saat halaman dimuat
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    if (currentTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+
+    // 2. Fungsi saat tombol diklik
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    if (themeToggleBtn) {
+      themeToggleBtn.addEventListener('click', () => {
+        // Toggle class 'dark' pada tag root (<html>)
+        document.documentElement.classList.toggle('dark');
+        
+        // Simpan status pilihan ke localStorage
+        let theme = 'light';
+        if (document.documentElement.classList.contains('dark')) {
+          theme = 'dark';
+        }
+        localStorage.setItem('theme', theme);
+      });
+    }
+  </script>
 </body>
 </html>
