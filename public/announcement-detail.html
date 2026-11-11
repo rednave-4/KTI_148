@@ -56,5 +56,18 @@
       }
     });
   </script>
+
+  <!-- Bagian untuk menampilkan QR Code menuju tautan pengumuman ini -->
+  <div class="qr-container" style="margin-top: 2rem; text-align: center; padding: 1rem; border: 1px dashed var(--border); border-radius: 8px;">
+    <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.5rem;">Pindai QR Code ini untuk membuka pengumuman di perangkat seluler:</p>
+    <img id="qr-code-img" src="" alt="QR Code Pengumuman" style="width: 120px; height: 120px;">
+  </div>
+
+  <script>
+    // Skrip otomatis untuk menghasilkan QR Code berdasarkan URL halaman saat ini
+    const currentUrl = window.location.href;
+    const qrImg = document.getElementById('qr-code-img');
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(currentUrl)}`;
+  </script>
 </body>
 </html>

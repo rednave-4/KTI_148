@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalender Kegiatan - SMARIDASA</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+    }
+    .calendar-day-header {
+      text-align: center;
+      font-weight: bold;
+      color: var(--primary);
+      padding: 0.5rem;
+    }
+    .calendar-cell {
+      min-height: 90px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.5rem;
+      background: var(--card-bg, #fff);
+      position: relative;
+    }
+    .calendar-date {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    .calendar-event {
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.7rem;
+      padding: 2px 4px;
+      border-radius: 3px;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
+</head>
+<body>
+  <button id="theme-toggle" class="floating-theme-btn" aria-label="Toggle Theme">🌙</button>
+
+  <header>
+    <nav class="navbar">
+      <div class="logo">SMARIDASA</div>
+      <ul class="nav-links">
+        <li><a href="/index.html">Beranda</a></li>
+        <li><a href="/announcements.html">Pengumuman</a></li>
+        <li><a href="/calendar.html" class="active">Kalender</a></li>
+        <li><a href="/map.html">Denah Sekolah</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="container" style="padding: 2rem 1rem; max-width: 900px; margin: 0 auto;">
+    <h1 style="color: var(--primary); margin-bottom: 0.5rem;">Kalender Kegiatan Sekolah</h1>
+    <p style="color: var(--text-light); margin-bottom: 1.5rem;">Agenda bulanan kegiatan dan pengumuman penting SMARIDASA.</p>
+
+    <!-- Kontrol Bulan Sederhana -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h2 id="current-month-year" style="font-size: 1.2rem; color: var(--text);">November 2026</h2>
+    </div>
+
+    <!-- Grid Kalender -->
+    <div class="calendar-grid">
+      <div class="calendar-day-header">Min</div>
+      <div class="calendar-day-header">Sen</div>
+      <div class="calendar-day-header">Sel</div>
+      <div class="calendar-day-header">Rab</div>
+      <div class="calendar-day-header">Kam</div>
+      <div class="calendar-day-header">Jum</div>
+      <div class="calendar-day-header">Sab</div>
+
+      <!-- Contoh Sel Kalender Statis/Dinamis -->
+      <div class="calendar-cell"><div class="calendar-date">1</div></div>
+      <div class="calendar-cell"><div class="calendar-date">2</div></div>
+      <div class="calendar-cell"><div class="calendar-date">3</div></div>
+      <div class="calendar-cell"><div class="calendar-date">4</div></div>
+      <div class="calendar-cell"><div class="calendar-date">5</div></div>
+      <div class="calendar-cell"><div class="calendar-date">6</div></div>
+      <div class="calendar-cell"><div class="calendar-date">7</div></div>
+      
+      <div class="calendar-cell"><div class="calendar-date">8</div></div>
+      <div class="calendar-cell"><div class="calendar-date">9</div></div>
+      <div class="calendar-cell">
+        <div class="calendar-date">10</div>
+        <div class="calendar-event">Upacara Bendera</div>
+      </div>
+      <div class="calendar-cell"><div class="calendar-date">11</div></div>
+      <div class="calendar-cell"><div class="calendar-date">12</div></div>
+      <div class="calendar-cell"><div class="calendar-date">13</div></div>
+      <div class="calendar-cell"><div class="calendar-date">14</div></div>
+    </div>
+  </main>
+
+  <footer style="text-align: center; padding: 1.5rem; color: var(--text-light); font-size: 0.9rem;">
+    &copy; 2026 SMARIDASA. Seluruh hak cipta dilindungi.
+  </footer>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>
