@@ -1,11 +1,13 @@
 const pool = require('../config/database');
 
-// --- ENDPOINT PUBLIK (Dengan Deteksi Otomatis Status Done) ---
+// --- ENDPOINT PUBLIK (Dengan Deteksi Otomatis Status Done + Search & Filter) ---
 exports.getPublicAnnouncements = async (req, res, next) => {
   try {
-    const [rows] = await pool.execute(`
+    const { search, category } = req.query;
+
+    let query = `
       SELECT a.announcement_id, a.title, a.slug, a.description, a.event_date,
-             a.start_time, a.end_time, a.image_path, a.published_at,
+             a.start_time, a.end_time, a.image_path, a.published_at, a.category,
              l.location_id, l.name AS location_name,
              CASE 
                WHEN a.status = 'published' AND CONCAT(a.event_date, ' ', COALESCE(a.end_time, a.start_time)) < NOW() 
@@ -15,10 +17,28 @@ exports.getPublicAnnouncements = async (req, res, next) => {
       FROM announcements a
       LEFT JOIN locations l ON a.location_id = l.location_id
       WHERE a.status IN ('published', 'done')
+    `;
+
+    const params = [];
+
+    if (search && search.trim()) {
+      query += ` AND (a.title LIKE ? OR a.description LIKE ?)`;
+      const term = `%${search.trim()}%`;
+      params.push(term, term);
+    }
+
+    if (category && category.trim() && category !== 'all') {
+      query += ` AND a.category = ?`;
+      params.push(category.trim().toLowerCase());
+    }
+
+    query += `
       ORDER BY 
         CASE WHEN CONCAT(a.event_date, ' ', COALESCE(a.end_time, a.start_time)) < NOW() THEN 1 ELSE 0 END ASC,
         a.published_at DESC
-    `);
+    `;
+
+    const [rows] = await pool.execute(query, params);
 
     return res.json({ success: true, count: rows.length, data: rows });
   } catch (error) {
@@ -31,11 +51,11 @@ exports.getPublicAnnouncementById = async (req, res, next) => {
     const { id } = req.params;
     const [rows] = await pool.execute(`
       SELECT a.announcement_id, a.title, a.slug, a.description, a.event_date,
-             a.start_time, a.end_time, a.image_path, a.published_at,
+             a.start_time, a.end_time, a.image_path, a.published_at, a.category,
              l.location_id, l.name AS location_name, l.parent_location_id
       FROM announcements a
       LEFT JOIN locations l ON a.location_id = l.location_id
-      WHERE a.announcement_id = ? AND a.status = 'published'
+      WHERE a.announcement_id = ? AND a.status IN ('published', 'done')
     `, [id]);
 
     if (rows.length === 0) {
@@ -65,9 +85,37 @@ exports.getAdminAnnouncements = async (req, res, next) => {
   }
 };
 
+// Statistik untuk Dashboard Admin
+exports.getAdminStats = async (req, res, next) => {
+  try {
+    const [rows] = await pool.execute(`
+      SELECT 
+        COUNT(*) AS total,
+        SUM(CASE WHEN status = 'published' AND CONCAT(event_date, ' ', COALESCE(end_time, start_time)) >= NOW() THEN 1 ELSE 0 END) AS aktif,
+        SUM(CASE WHEN status = 'published' AND CONCAT(event_date, ' ', COALESCE(end_time, start_time)) < NOW() THEN 1 ELSE 0 END) AS selesai,
+        SUM(CASE WHEN status = 'draft' THEN 1 ELSE 0 END) AS draft,
+        SUM(CASE WHEN status = 'archived' THEN 1 ELSE 0 END) AS archived
+      FROM announcements
+    `);
+
+    return res.json({
+      success: true,
+      data: {
+        total: rows[0].total || 0,
+        aktif: rows[0].aktif || 0,
+        selesai: rows[0].selesai || 0,
+        draft: rows[0].draft || 0,
+        archived: rows[0].archived || 0
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.createAnnouncement = async (req, res, next) => {
   try {
-    const { title, description, event_date, start_time, end_time, location_id, status } = req.body;
+    const { title, description, event_date, start_time, end_time, location_id, status, category } = req.body;
     const admin_id = req.session.admin.id;
     const image_path = req.file ? `/uploads/posters/${req.file.filename}` : null;
 
@@ -75,14 +123,15 @@ exports.createAnnouncement = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Judul, deskripsi, tanggal, dan waktu mulai wajib diisi.' });
     }
 
-    const annStatus = status ? status.toLowerCase() : 'published'; // sesuaikan dengan enum schema.sql
-    const published_at = annStatus === 'PUBLISHED' ? new Date() : null;
+    const annStatus = status ? status.toLowerCase() : 'published';
+    const annCategory = category ? category.toLowerCase() : 'umum';
+    const published_at = (annStatus === 'published') ? new Date() : null;
 
     const [result] = await pool.execute(`
       INSERT INTO announcements 
-      (admin_id, location_id, title, description, event_date, start_time, end_time, image_path, status, published_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [admin_id, location_id || null, title, description, event_date, start_time, end_time || null, image_path, annStatus, published_at]);
+      (admin_id, location_id, title, description, event_date, start_time, end_time, image_path, category, status, published_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [admin_id, location_id || null, title, description, event_date, start_time, end_time || null, image_path, annCategory, annStatus, published_at]);
 
     return res.status(201).json({
       success: true,
@@ -97,31 +146,33 @@ exports.createAnnouncement = async (req, res, next) => {
 exports.updateAnnouncement = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { title, description, event_date, start_time, end_time, location_id, status } = req.body;
+    const { title, description, event_date, start_time, end_time, location_id, status, category } = req.body;
 
     const [existing] = await pool.execute('SELECT image_path, status FROM announcements WHERE announcement_id = ?', [id]);
     if (existing.length === 0) {
       return res.status(404).json({ success: false, message: 'Pengumuman tidak ditemukan.' });
     }
 
-    // Jika user mengunggah file baru, gunakan file baru. Jika tidak, tetap pakai image_path yang lama.
     let image_path = existing[0].image_path;
     if (req.file) {
       image_path = `/uploads/posters/${req.file.filename}`;
     }
 
+    const annStatus = status ? status.toLowerCase() : existing[0].status;
+    const annCategory = category ? category.toLowerCase() : 'umum';
+
     let published_at = null;
-    if (status === 'PUBLISHED' && existing[0].status !== 'PUBLISHED') {
+    if (annStatus === 'published' && existing[0].status !== 'published') {
       published_at = new Date();
     }
 
     await pool.execute(`
       UPDATE announcements 
       SET title = ?, description = ?, event_date = ?, start_time = ?, end_time = ?, 
-          location_id = ?, image_path = ?, status = ?,
+          location_id = ?, image_path = ?, category = ?, status = ?,
           published_at = COALESCE(?, published_at)
       WHERE announcement_id = ?
-    `, [title, description, event_date, start_time, end_time || null, location_id || null, image_path, status, published_at, id]);
+    `, [title, description, event_date, start_time, end_time || null, location_id || null, image_path, annCategory, annStatus, published_at, id]);
 
     return res.json({ success: true, message: 'Pengumuman berhasil diperbarui.' });
   } catch (error) {
@@ -138,18 +189,19 @@ exports.updateStatus = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Status tidak valid.' });
     }
 
-    const publishedClause = status === 'PUBLISHED' ? ', published_at = NOW()' : '';
+    const annStatus = status.toLowerCase();
+    const publishedClause = annStatus === 'published' ? ', published_at = NOW()' : '';
 
     const [result] = await pool.execute(
       `UPDATE announcements SET status = ? ${publishedClause} WHERE announcement_id = ?`,
-      [status, id]
+      [annStatus, id]
     );
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ success: false, message: 'Pengumuman tidak ditemukan.' });
     }
 
-    return res.json({ success: true, message: `Status berhasil diubah menjadi ${status}.` });
+    return res.json({ success: true, message: `Status berhasil diubah menjadi ${annStatus}.` });
   } catch (error) {
     next(error);
   }

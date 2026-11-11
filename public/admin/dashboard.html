@@ -14,6 +14,44 @@
     .form-group { margin-bottom: 1rem; }
     .form-group label { display: block; margin-bottom: 0.3rem; font-weight: 500; font-size: 0.9rem; }
     .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--radius); }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+    .stat-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.25rem;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+    .stat-card .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.2;
+    }
+    .stat-card .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-top: 0.25rem;
+    }
+    .stat-card.aktif .stat-value { color: #16a34a; }
+    .stat-card.selesai .stat-value { color: #64748b; }
+    .stat-card.draft .stat-value { color: #d97706; }
+
+    html.dark .stat-card {
+      background: #1e293b;
+      border-color: #334155;
+    }
+    html.dark th {
+      background: #334155 !important;
+      color: #f1f5f9 !important;
+    }
   </style>
 </head>
 <body>
@@ -28,11 +66,31 @@
       <button id="open-modal-btn" class="btn">+ Tambah Pengumuman</button>
     </div>
 
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-total">-</div>
+        <div class="stat-label">Total Pengumuman</div>
+      </div>
+      <div class="stat-card aktif">
+        <div class="stat-value" id="stat-aktif">-</div>
+        <div class="stat-label">Aktif</div>
+      </div>
+      <div class="stat-card selesai">
+        <div class="stat-value" id="stat-selesai">-</div>
+        <div class="stat-label">Selesai</div>
+      </div>
+      <div class="stat-card draft">
+        <div class="stat-value" id="stat-draft">-</div>
+        <div class="stat-label">Draft</div>
+      </div>
+    </div>
+
     <div class="card" style="overflow-x: auto;">
       <table id="admin-table">
         <thead>
           <tr>
             <th>Judul</th>
+            <th>Kategori</th>
             <th>Tanggal</th>
             <th>Lokasi</th>
             <th>Status</th>
@@ -40,7 +98,7 @@
           </tr>
         </thead>
         <tbody id="admin-tbody">
-          <tr><td colspan="5" style="text-align: center;">Memuat data...</td></tr>
+          <tr><td colspan="6" style="text-align: center;">Memuat data...</td></tr>
         </tbody>
       </table>
     </div>
@@ -66,11 +124,30 @@
             <input type="date" id="event_date" required>
           </div>
           <div class="form-group">
+            <label>Kategori</label>
+            <select id="category">
+              <option value="umum">Umum</option>
+              <option value="osis">OSIS</option>
+              <option value="akademik">Akademik</option>
+              <option value="lomba">Lomba</option>
+              <option value="ekstrakurikuler">Ekstrakurikuler</option>
+              <option value="lainnya">Lainnya</option>
+            </select>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
             <label>Status Publikasi</label>
             <select id="status">
               <option value="draft">Draft</option>
               <option value="published">Published</option>
               <option value="archived">Archived</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Lokasi Kegiatan</label>
+            <select id="location_id">
+              <option value="">-- Pilih Lokasi Sekolah --</option>
             </select>
           </div>
         </div>
@@ -83,12 +160,6 @@
             <label>Waktu Selesai (Opsional)</label>
             <input type="time" id="end_time">
           </div>
-        </div>
-        <div class="form-group">
-          <label>Lokasi Kegiatan</label>
-          <select id="location_id">
-            <option value="">-- Pilih Lokasi Sekolah --</option>
-          </select>
         </div>
         <div class="form-group">
           <label>Poster Kegiatan (Opsional - Maks 5MB)</label>
@@ -104,26 +175,22 @@
 
   <script src="/js/admin.js"></script>
 
-    <!-- Tombol Toggle Tema -->
   <button id="theme-toggle" class="floating-theme-btn" 
     style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; 
            padding: 12px 16px; border-radius: 50px; 
            background-color: #1e293b; color: #f8fafc; 
            border: none; cursor: pointer; 
-           box-shadow: 0 4px 6px rgba(0,0,0,0.2); 
-           transition: transform 0.2s;">
+           box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
     🌙 / ☀️
   </button>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      // Terapkan tema yang tersimpan
       const savedTheme = localStorage.getItem('theme') || 'light';
       if (savedTheme === 'dark') {
         document.documentElement.classList.add('dark');
       }
 
-      // Event toggle
       const toggleBtn = document.getElementById('theme-toggle');
       if (toggleBtn) {
         toggleBtn.addEventListener('click', () => {

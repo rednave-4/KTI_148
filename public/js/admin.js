@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   checkAuth();
   loadLocationsDropdown();
+  loadAdminStats();
   loadAdminAnnouncements();
 
   const modal = document.getElementById('announcement-modal');
@@ -9,8 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('modal-title').innerText = 'Tambah Pengumuman Baru';
     document.getElementById('announcement-form').reset();
     document.getElementById('announcement-id').value = '';
+    document.getElementById('category').value = 'umum';
 
-    // Hapus notice poster lama jika ada
     const oldNotice = document.getElementById('poster-notice');
     if (oldNotice) oldNotice.remove();
 
@@ -46,6 +47,21 @@ async function checkAuth() {
   }
 }
 
+async function loadAdminStats() {
+  try {
+    const res = await fetch('/api/announcements/admin/stats');
+    const result = await res.json();
+    if (result.success && result.data) {
+      document.getElementById('stat-total').textContent = result.data.total;
+      document.getElementById('stat-aktif').textContent = result.data.aktif;
+      document.getElementById('stat-selesai').textContent = result.data.selesai;
+      document.getElementById('stat-draft').textContent = result.data.draft;
+    }
+  } catch (err) {
+    console.error('Gagal memuat statistik:', err);
+  }
+}
+
 async function loadLocationsDropdown() {
   try {
     const res = await fetch('/api/locations');
@@ -67,6 +83,15 @@ async function loadLocationsDropdown() {
   }
 }
 
+const categoryLabels = {
+  umum: 'Umum',
+  osis: 'OSIS',
+  akademik: 'Akademik',
+  lomba: 'Lomba',
+  ekstrakurikuler: 'Ekstrakurikuler',
+  lainnya: 'Lainnya'
+};
+
 async function loadAdminAnnouncements() {
   const tbody = document.getElementById('admin-tbody');
   try {
@@ -78,6 +103,7 @@ async function loadAdminAnnouncements() {
       result.data.forEach(item => {
         const status = (item.status || '').toLowerCase();
         const isPublished = status === 'published';
+        const cat = (item.category || 'umum').toLowerCase();
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -85,6 +111,7 @@ async function loadAdminAnnouncements() {
             <strong>${escapeHtml(item.title)}</strong><br>
             <small style="color:var(--text-light)">Oleh: ${escapeHtml(item.author_name || '-')}</small>
           </td>
+          <td>${categoryLabels[cat] || cat}</td>
           <td>${item.event_date ? item.event_date.split('T')[0] : '-'}</td>
           <td>${escapeHtml(item.location_name || '-')}</td>
           <td>
@@ -100,11 +127,11 @@ async function loadAdminAnnouncements() {
         tbody.appendChild(tr);
       });
     } else {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Belum ada data pengumuman.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Belum ada data pengumuman.</td></tr>';
     }
   } catch (err) {
     console.error(err);
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Gagal memuat data.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Gagal memuat data.</td></tr>';
   }
 }
 
@@ -121,6 +148,7 @@ async function handleFormSubmit(e) {
   formData.append('end_time', document.getElementById('end_time').value || '');
   formData.append('location_id', document.getElementById('location_id').value || '');
   formData.append('status', document.getElementById('status').value.toLowerCase());
+  formData.append('category', document.getElementById('category').value.toLowerCase());
 
   const posterFile = document.getElementById('poster').files[0];
   if (posterFile) {
@@ -144,6 +172,7 @@ async function handleFormSubmit(e) {
     if (result.success) {
       document.getElementById('announcement-modal').style.display = 'none';
       loadAdminAnnouncements();
+      loadAdminStats();
     } else {
       alert(result.message || 'Gagal menyimpan data.');
     }
@@ -171,11 +200,11 @@ async function editItem(id) {
         document.getElementById('start_time').value = item.start_time || '';
         document.getElementById('end_time').value = item.end_time || '';
         document.getElementById('status').value = (item.status || 'draft').toLowerCase();
+        document.getElementById('category').value = (item.category || 'umum').toLowerCase();
 
         const locationSelect = document.getElementById('location_id');
         locationSelect.value = item.location_id ? String(item.location_id) : '';
 
-        // Notice poster
         const posterInput = document.getElementById('poster');
         posterInput.value = '';
 
@@ -217,6 +246,7 @@ async function deleteItem(id) {
 
     if (result.success) {
       loadAdminAnnouncements();
+      loadAdminStats();
     } else {
       alert(result.message || 'Gagal menghapus.');
     }

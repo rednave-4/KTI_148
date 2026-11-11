@@ -5,9 +5,86 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Daftar Pengumuman - SMARIDASA</title>
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .filters-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .search-filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      flex: 1;
+    }
+    .search-box {
+      position: relative;
+      min-width: 220px;
+      flex: 1;
+      max-width: 360px;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 0.55rem 1rem 0.55rem 2.4rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: var(--white);
+      color: inherit;
+    }
+    .search-box::before {
+      content: "🔍";
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+    .filter-select, .sort-select {
+      padding: 0.55rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--white);
+      color: inherit;
+      font-size: 0.9rem;
+    }
+    .category-badge {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .cat-umum { background: #e0e7ff; color: #3730a3; }
+    .cat-osis { background: #dcfce7; color: #166534; }
+    .cat-akademik { background: #fef3c7; color: #92400e; }
+    .cat-lomba { background: #fce7f3; color: #9d174d; }
+    .cat-ekstrakurikuler { background: #e0f2fe; color: #075985; }
+    .cat-lainnya { background: #f1f5f9; color: #475569; }
+
+    html.dark .search-box input,
+    html.dark .filter-select,
+    html.dark .sort-select {
+      background: #0f172a;
+      border-color: #334155;
+      color: #e2e8f0;
+    }
+    html.dark .cat-umum { background: #312e81; color: #c7d2fe; }
+    html.dark .cat-osis { background: #14532d; color: #bbf7d0; }
+    html.dark .cat-akademik { background: #78350f; color: #fde68a; }
+    html.dark .cat-lomba { background: #831843; color: #fbcfe8; }
+    html.dark .cat-ekstrakurikuler { background: #0c4a6e; color: #bae6fd; }
+    html.dark .cat-lainnya { background: #334155; color: #cbd5e1; }
+  </style>
 </head>
 <body>
-  <!-- Navbar Header -->
   <nav class="navbar" style="display: flex; justify-content: flex-start; align-items: center; gap: 2rem; padding: 1rem 2rem;">
     <a href="/" class="nav-brand" style="font-weight: bold; font-size: 1.25rem;">SMARIDASA</a>
     <ul class="nav-links" style="display: flex; list-style: none; gap: 1.5rem; margin: 0; padding: 0;">
@@ -19,15 +96,28 @@
   </nav>
 
   <main class="container">
-    <h1 style="margin-bottom: 1.5rem; color: var(--primary);">Semua Pengumuman Kegiatan Sekolah</h1>
+    <h1 style="margin-bottom: 0.5rem; color: var(--primary);">Semua Pengumuman Kegiatan Sekolah</h1>
+    <p style="color: var(--text-light); margin-bottom: 1.5rem;">Menampilkan seluruh kegiatan dan informasi resmi SMARIDASA.</p>
     
-    <!-- Filter & Sorting Controls -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
-      <p style="color: var(--text-light); margin: 0;">Menampilkan seluruh kegiatan dan informasi resmi SMARIDASA.</p>
-      
+    <div class="filters-bar">
+      <div class="search-filter-group">
+        <div class="search-box">
+          <input type="text" id="search-input" placeholder="Cari judul atau isi pengumuman..." autocomplete="off">
+        </div>
+        <select id="category-filter" class="filter-select">
+          <option value="all">Semua Kategori</option>
+          <option value="umum">Umum</option>
+          <option value="osis">OSIS</option>
+          <option value="akademik">Akademik</option>
+          <option value="lomba">Lomba</option>
+          <option value="ekstrakurikuler">Ekstrakurikuler</option>
+          <option value="lainnya">Lainnya</option>
+        </select>
+      </div>
+
       <div style="display: flex; align-items: center; gap: 0.5rem;">
         <label for="sort-select" style="font-size: 0.9rem; font-weight: 600;">Urutkan:</label>
-        <select id="sort-select" style="padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; background-color: var(--card-bg, #fff); color: inherit;">
+        <select id="sort-select" class="sort-select">
           <option value="newest">Terbaru (Default)</option>
           <option value="oldest">Terlama</option>
           <option value="event_soon">Waktu Kegiatan Terdekat</option>
@@ -46,7 +136,6 @@
 
   <script src="/js/announcements.js"></script>
 
-  <!-- Tombol Toggle Tema Melayang di Pojok Kanan Bawah -->
   <button id="theme-toggle" class="floating-theme-btn" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 16px; border-radius: 50px; background-color: #1e293b; color: #f8fafc; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.2s;">
     🌙 / ☀️
   </button>
