@@ -86,56 +86,5 @@
       }
     });
   </script>
-
-  <script>
-    (function () {
-      const loader = document.getElementById('page-loader');
-      const bar = document.getElementById('loader-bar');
-      const percentText = document.getElementById('loader-percent');
-
-      if (!loader || !bar || !percentText) return;
-
-      let progress = 0;
-
-      const timer = setInterval(() => {
-        // Naik pelan di awal, lebih cepat di tengah
-        const step = progress < 60 ? Math.random() * 12 + 4 : Math.random() * 8 + 2;
-        progress += step;
-
-        if (progress >= 100) {
-          progress = 100;
-          clearInterval(timer);
-
-          bar.style.width = '100%';
-          percentText.textContent = '100%';
-
-          // Tunggu sebentar lalu hilangkan loader
-          setTimeout(() => {
-            loader.classList.add('hide');
-            // Hapus dari DOM setelah animasi
-            setTimeout(() => loader.remove(), 500);
-          }, 250);
-          return;
-        }
-
-        bar.style.width = progress + '%';
-        percentText.textContent = Math.floor(progress) + '%';
-      }, 120);
-
-      // Cadangan: jika halaman sudah benar-benar load, pastikan selesai
-      window.addEventListener('load', () => {
-        if (progress < 100) {
-          progress = 100;
-          bar.style.width = '100%';
-          percentText.textContent = '100%';
-          clearInterval(timer);
-          setTimeout(() => {
-            loader.classList.add('hide');
-            setTimeout(() => loader.remove(), 500);
-          }, 200);
-        }
-      });
-    })();
-  </script>
 </body>
 </html>
