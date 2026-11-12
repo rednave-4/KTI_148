@@ -1,14 +1,25 @@
 :root {
-  --primary: #1e3a8a;
-  --primary-dark: #1e293b;
-  --accent: #2563eb;
-  --bg-color: #f8fafc;
-  --text-main: #334155;
-  --text-light: #64748b;
-  --white: #ffffff;
-  --border: #e2e8f0;
-  --radius: 8px;
-  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  /* Primary Palette - SMARIDASA */
+  --primary: #0B3D91;
+  --primary-dark: #082E6E;
+  --primary-light: #1A56B0;
+
+  /* Accent */
+  --accent: #E82533;
+  --accent-hover: #C41E2A;
+
+  /* Neutrals */
+  --bg: #F7F8FA;
+  --white: #FFFFFF;
+  --card: #FFFFFF;
+  --text: #1E293B;
+  --text-light: #64748B;
+  --border: #E2E8F0;
+
+  /* Utility */
+  --radius: 10px;
+  --shadow: 0 4px 16px rgba(11, 61, 145, 0.08);
+  --transition: 0.25s ease;
 }
 
 * {
@@ -19,8 +30,8 @@
 }
 
 body {
-  background-color: var(--bg-color);
-  color: var(--text-main);
+  background-color: var(--bg);
+  color: var(--text);
   line-height: 1.6;
 }
 
@@ -35,29 +46,34 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 .nav-brand {
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   color: var(--primary);
   text-decoration: none;
+  letter-spacing: -0.3px;
 }
 
 .nav-links {
   list-style: none;
   display: flex;
   gap: 1.5rem;
+  margin: 0;
+  padding: 0;
 }
 
 .nav-links a {
   text-decoration: none;
-  color: var(--text-main);
+  color: var(--text);
   font-weight: 500;
   transition: color 0.2s;
 }
 
-.nav-links a:hover, .nav-links a.active {
+.nav-links a:hover,
+.nav-links a.active {
   color: var(--accent);
 }
 
@@ -69,30 +85,34 @@ body {
 }
 
 /* Buttons */
-.btn {
+.btn,
+.btn-primary {
   display: inline-block;
   background: var(--accent);
-  color: var(--white);
-  padding: 0.6rem 1.2rem;
+  color: #ffffff;
+  padding: 0.7rem 1.4rem;
   border-radius: var(--radius);
-  text-decoration: none;
   font-weight: 600;
+  text-decoration: none;
   border: none;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: var(--transition);
+  font-family: inherit;
 }
 
-.btn:hover {
-  background: #1d4ed8;
+.btn:hover,
+.btn-primary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
 }
 
 .btn-secondary {
-  background: #e2e8f0;
-  color: var(--text-main);
+  background: #E2E8F0;
+  color: var(--text);
 }
 
 .btn-secondary:hover {
-  background: #cbd5e1;
+  background: #CBD5E1;
 }
 
 /* Cards */
@@ -102,6 +122,28 @@ body {
   border-radius: var(--radius);
   padding: 1.5rem;
   box-shadow: var(--shadow);
+}
+
+/* Hero */
+.hero {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: white;
+  padding: 4.5rem 2rem;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 2.6rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 1rem;
+  line-height: 1.15;
+}
+
+.hero p {
+  font-size: 1.1rem;
+  opacity: 0.92;
+  margin-bottom: 2rem;
 }
 
 /* Footer */
@@ -115,21 +157,34 @@ footer {
   font-size: 0.9rem;
 }
 
+.floating-theme-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  padding: 12px 16px;
+  border-radius: 50px;
+  background-color: #1e293b;
+  color: #f8fafc;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+}
+
 .floating-theme-btn:hover {
   transform: scale(1.1);
 }
 
 /* =========================================
-   DARK MODE — Keselarasan Penuh
+   DARK MODE
    ========================================= */
 
-/* Latar & Teks Utama */
 html.dark body {
   background-color: #0f172a;
   color: #e2e8f0;
 }
 
-/* Navbar */
 html.dark .navbar {
   background-color: #1e293b !important;
   border-bottom: 1px solid #334155 !important;
@@ -146,10 +201,9 @@ html.dark .nav-links a {
 
 html.dark .nav-links a:hover,
 html.dark .nav-links a.active {
-  color: #93c5fd !important;
+  color: #fca5a5 !important;
 }
 
-/* Card & Container */
 html.dark .card,
 html.dark .modal-content,
 html.dark .login-card,
@@ -163,7 +217,6 @@ html.dark div[style*="background:#fff"] {
   border-color: #334155 !important;
 }
 
-/* Judul & Teks */
 html.dark h1,
 html.dark h2,
 html.dark h3,
@@ -181,7 +234,6 @@ html.dark [style*="color: var(--text-light)"] {
   color: #94a3b8 !important;
 }
 
-/* Tabel (Admin) */
 html.dark table {
   background-color: #1e293b !important;
   color: #e2e8f0 !important;
@@ -200,7 +252,6 @@ html.dark td {
   border-color: #334155 !important;
 }
 
-/* Form Elements */
 html.dark input,
 html.dark textarea,
 html.dark select {
@@ -226,14 +277,15 @@ html.dark label {
   color: #cbd5e1 !important;
 }
 
-/* Tombol */
-html.dark .btn {
-  background-color: #2563eb !important;
+html.dark .btn,
+html.dark .btn-primary {
+  background-color: var(--accent) !important;
   color: #ffffff !important;
 }
 
-html.dark .btn:hover {
-  background-color: #1d4ed8 !important;
+html.dark .btn:hover,
+html.dark .btn-primary:hover {
+  background-color: var(--accent-hover) !important;
 }
 
 html.dark .btn-secondary {
@@ -251,21 +303,12 @@ html.dark button[style*="background: #fee2e2"] {
   color: #fecaca !important;
 }
 
-/* Badge / Status */
-html.dark .status-badge,
-html.dark .info-badge,
-html.dark span[style*="background"] {
-  /* biarkan warna badge tetap kontras */
-}
-
-/* Footer */
 html.dark footer {
   background-color: #1e293b !important;
   border-top: 1px solid #334155 !important;
   color: #94a3b8 !important;
 }
 
-/* Map Page */
 html.dark .map-controls,
 html.dark .svg-viewport,
 html.dark .search-results-dropdown {
@@ -291,12 +334,10 @@ html.dark .search-result-item small {
   color: #94a3b8 !important;
 }
 
-/* Modal Overlay tetap gelap */
 html.dark .modal {
   background: rgba(0, 0, 0, 0.7) !important;
 }
 
-/* Tombol Theme */
 html.dark .floating-theme-btn {
   background-color: #334155 !important;
   color: #f8fafc !important;
@@ -306,7 +347,6 @@ html.dark .floating-theme-btn:hover {
   transform: scale(1.08);
 }
 
-/* Link */
 html.dark a {
   color: #93c5fd;
 }
@@ -315,7 +355,6 @@ html.dark a:hover {
   color: #bfdbfe;
 }
 
-/* Empty state & pesan error */
 html.dark .empty-state,
 html.dark .error-message {
   color: #fca5a5 !important;
