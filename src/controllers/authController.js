@@ -51,7 +51,7 @@ exports.logout = (req, res) => {
     if (err) {
       return res.status(500).json({ success: false, message: 'Gagal logout.' });
     }
-    res.clearCookie('sid');
+    res.clearCookie('connect.sid');
     return res.json({ success: true, message: 'Berhasil logout.' });
   });
 };

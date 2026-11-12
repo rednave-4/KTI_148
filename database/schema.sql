@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS locations (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
--- 3. Tabel announcements (Update Status Support)
+-- 3. Tabel announcements
 -- =====================================================
 CREATE TABLE IF NOT EXISTS announcements (
   announcement_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS announcements (
   start_time TIME NOT NULL,
   end_time TIME NULL,
   image_path VARCHAR(255) NULL,
+  category VARCHAR(50) NOT NULL DEFAULT 'umum',
   status ENUM('draft', 'published', 'archived', 'done') NOT NULL DEFAULT 'draft',
   published_at DATETIME NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -75,7 +76,8 @@ CREATE TABLE IF NOT EXISTS announcements (
 
   INDEX idx_announcements_status (status),
   INDEX idx_announcements_event_date (event_date),
-  INDEX idx_announcements_location (location_id)
+  INDEX idx_announcements_location (location_id),
+  INDEX idx_announcements_category (category)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
