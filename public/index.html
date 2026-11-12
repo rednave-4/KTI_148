@@ -7,6 +7,17 @@
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+  <!-- Loading Screen -->
+  <div id="page-loader">
+    <div class="loader-content">
+      <div class="loader-logo">SMARIDASA</div>
+      <div class="loader-bar-track">
+        <div class="loader-bar-fill" id="loader-bar"></div>
+      </div>
+      <div class="loader-percent" id="loader-percent">0%</div>
+    </div>
+  </div>
+  
   <!-- Navbar -->
   <nav class="navbar" style="display: flex; justify-content: flex-start; align-items: center; gap: 2rem; padding: 1rem 2rem;">
     <a href="/" class="nav-brand" style="font-weight: bold; font-size: 1.25rem;">SMARIDASA</a>
@@ -74,6 +85,57 @@
         });
       }
     });
+  </script>
+
+  <script>
+    (function () {
+      const loader = document.getElementById('page-loader');
+      const bar = document.getElementById('loader-bar');
+      const percentText = document.getElementById('loader-percent');
+
+      if (!loader || !bar || !percentText) return;
+
+      let progress = 0;
+
+      const timer = setInterval(() => {
+        // Naik pelan di awal, lebih cepat di tengah
+        const step = progress < 60 ? Math.random() * 12 + 4 : Math.random() * 8 + 2;
+        progress += step;
+
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(timer);
+
+          bar.style.width = '100%';
+          percentText.textContent = '100%';
+
+          // Tunggu sebentar lalu hilangkan loader
+          setTimeout(() => {
+            loader.classList.add('hide');
+            // Hapus dari DOM setelah animasi
+            setTimeout(() => loader.remove(), 500);
+          }, 250);
+          return;
+        }
+
+        bar.style.width = progress + '%';
+        percentText.textContent = Math.floor(progress) + '%';
+      }, 120);
+
+      // Cadangan: jika halaman sudah benar-benar load, pastikan selesai
+      window.addEventListener('load', () => {
+        if (progress < 100) {
+          progress = 100;
+          bar.style.width = '100%';
+          percentText.textContent = '100%';
+          clearInterval(timer);
+          setTimeout(() => {
+            loader.classList.add('hide');
+            setTimeout(() => loader.remove(), 500);
+          }, 200);
+        }
+      });
+    })();
   </script>
 </body>
 </html>
