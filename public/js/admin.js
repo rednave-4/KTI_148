@@ -100,25 +100,45 @@ async function loadAdminAnnouncements() {
 
     if (result.success && result.data && result.data.length > 0) {
       tbody.innerHTML = '';
+
       result.data.forEach(item => {
         const status = (item.status || '').toLowerCase();
         const isPublished = status === 'published';
+
+        // Warna badge status
+        let badgeStyle = 'background: #fef9c3; color: #854d0e'; // default draft
+        if (isPublished) {
+          badgeStyle = 'background: #dcfce7; color: #166534';
+        } else if (status === 'archived') {
+          badgeStyle = 'background: #f1f5f9; color: #475569';
+        }
+
+        const categoryLabels = {
+          umum: 'Umum',
+          osis: 'OSIS',
+          akademik: 'Akademik',
+          lomba: 'Lomba',
+          ekstrakurikuler: 'Ekstrakurikuler',
+          lainnya: 'Lainnya'
+        };
         const cat = (item.category || 'umum').toLowerCase();
+        const catLabel = categoryLabels[cat] || cat;
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td data-label="Judul">
+          <td>
             <strong>${escapeHtml(item.title)}</strong><br>
             <small style="color:var(--text-light)">Oleh: ${escapeHtml(item.author_name || '-')}</small>
           </td>
-          <td data-label="Tanggal">${item.event_date ? item.event_date.split('T')[0] : '-'}</td>
-          <td data-label="Lokasi">${escapeHtml(item.location_name || '-')}</td>
-          <td data-label="Status">
-            <span style="padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; ${badgeColor}">
-              ${displayStatus.toUpperCase()}
+          <td>${catLabel}</td>
+          <td>${item.event_date ? item.event_date.split('T')[0] : '-'}</td>
+          <td>${escapeHtml(item.location_name || '-')}</td>
+          <td>
+            <span style="padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; ${badgeStyle}">
+              ${status.toUpperCase()}
             </span>
           </td>
-          <td data-label="Aksi">
+          <td>
             <button onclick="editItem(${item.announcement_id})" class="btn" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; margin-right: 0.3rem;">Edit</button>
             <button onclick="deleteItem(${item.announcement_id})" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; background: #fee2e2; color: #991b1b;">Hapus</button>
           </td>
@@ -130,7 +150,13 @@ async function loadAdminAnnouncements() {
     }
   } catch (err) {
     console.error(err);
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Gagal memuat data.</td></tr>';
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align: center; color: #dc2626; padding: 1.5rem;">
+          Gagal memuat data.<br>
+          <small style="color: var(--text-light);">Periksa koneksi atau pastikan Anda masih login.</small>
+        </td>
+      </tr>`;
   }
 }
 
