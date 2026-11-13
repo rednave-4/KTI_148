@@ -277,7 +277,7 @@
          class="powerclip"
          d="M -1263.0501,300.73125 H -66.102083 V 869.61132 H -1263.0501 Z m 883.50609,-1.53676 v 27.48897 h 41.04716 v -27.48897 z" /></clipPath></defs><g
      id="layer1"
-     style="display:inline;opacity:1"><image
+     style="display:none;opacity:1"><image
        width="1613"
        height="1001"
        preserveAspectRatio="none"
@@ -2340,7 +2340,7 @@
            style="fill:#d0272c;fill-opacity:1;stroke:#050303;stroke-width:0.316962;stroke-dasharray:none;stroke-opacity:0.946429;paint-order:fill markers stroke"
            d="m 989.07207,482.68024 0.0189,62.65144 -26.22109,25.63747 -1.03985,-108.70365 z"
            id="path186" /></g></g><g
-       id="g201"><g
+       id="Gedung-Borneo-1"><g
          id="layer27"><path
            style="fill:#c32126;fill-opacity:1;stroke:#050101;stroke-width:0.186;stroke-opacity:0.946429;paint-order:fill markers stroke"
            d="m 1345.2333,618.85472 29.6038,26.9799 -29.6289,29.13783 z"
