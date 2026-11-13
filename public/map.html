@@ -66,27 +66,41 @@
   <script src="/js/map.js"></script>
 
   <!-- Tombol Toggle Tema Melayang di Pojok Kanan Bawah -->
-  <button id="theme-toggle" class="floating-theme-btn" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 16px; border-radius: 50px; background-color: #1e293b; color: #f8fafc; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.2s;">
-    🌙 / ☀️
+  <button id="theme-toggle" class="floating-theme-btn" 
+    style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; 
+          width: 48px; height: 48px; border-radius: 50%; 
+          background-color: #1e293b; color: #f8fafc; 
+          border: none; cursor: pointer; 
+          box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+          font-size: 1.25rem; display: flex; align-items: center; justify-content: center;
+          transition: transform 0.2s, background-color 0.2s;">
+    🌙
   </button>
 
   <script>
-    if (typeof window.themeInitialized === 'undefined') {
-      window.themeInitialized = true;
+    document.addEventListener("DOMContentLoaded", () => {
+      const toggleBtn = document.getElementById('theme-toggle');
+      if (!toggleBtn) return;
+
+      function updateThemeIcon() {
+        const isDark = document.documentElement.classList.contains('dark');
+        toggleBtn.textContent = isDark ? '☀️' : '🌙';
+      }
+
+      // Terapkan tema tersimpan
       const savedTheme = localStorage.getItem('theme') || 'light';
       if (savedTheme === 'dark') {
         document.documentElement.classList.add('dark');
       }
+      updateThemeIcon();
 
-      const toggleBtn = document.getElementById('theme-toggle');
-      if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-          document.documentElement.classList.toggle('dark');
-          const activeTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-          localStorage.setItem('theme', activeTheme);
-        });
-      }
-    }
+      toggleBtn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        const activeTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        localStorage.setItem('theme', activeTheme);
+        updateThemeIcon();
+      });
+    });
   </script>
 </body>
 </html>
