@@ -63,6 +63,9 @@ async function loadSvgMap(svgPath) {
 /**
  * Mengambil data lokasi dari API & memasang Event Listener pada elemen SVG
  */
+/**
+ * Mengambil data lokasi dari API & memasang Event Listener pada elemen SVG
+ */
 async function bindSvgElements() {
   try {
     const response = await fetch('/api/locations');
@@ -70,22 +73,63 @@ async function bindSvgElements() {
 
     if (!result.success) return;
 
-    // Ambil semua elemen berbentuk rect, path, polygon, g di dalam SVG yang memiliki atribut id
-    const svgElements = document.querySelectorAll('#svg-container svg [id]');
+    const svgRoot = document.querySelector('#svg-container svg');
+    if (!svgRoot) return;
 
-    svgElements.forEach(el => {
+    // Ambil semua elemen yang punya id
+    const allElements = svgRoot.querySelectorAll('[id]');
+
+    allElements.forEach(el => {
       const elementId = el.getAttribute('id');
-      
-      // Berikan class CSS interaktif
+      if (!elementId) return;
+
+      // Skip ID generik / tidak penting (path, rect, dll yang dibuat Inkscape)
+      if (
+        elementId.startsWith('path') ||
+        elementId.startsWith('rect') ||
+        elementId.startsWith('g') && elementId.length < 6 || // g1, g2, dll
+        elementId.startsWith('layer') ||
+        elementId.startsWith('svg') ||
+        elementId.startsWith('defs') ||
+        elementId.startsWith('clipPath') ||
+        elementId.startsWith('filter') ||
+        elementId.startsWith('linearGradient') ||
+        elementId.startsWith('stop')
+      ) {
+        return;
+      }
+
+      // Berikan class interaktif
       el.classList.add('map-location');
 
-      // Pasang Event Listener Klik
+      // Event click
       el.addEventListener('click', (e) => {
         e.stopPropagation();
-        highlightSvgElement(el);
-        fetchLocationDetailBySvgId(elementId);
+
+        // Cari elemen yang paling tepat untuk di-highlight
+        // Prioritas: group yang punya id bermakna
+        let targetEl = el;
+
+        // Kalau yang diklik adalah path kecil, naik ke parent group
+        if (el.tagName.toLowerCase() !== 'g') {
+          const parentGroup = el.closest('g[id]');
+          if (parentGroup) {
+            const parentId = parentGroup.getAttribute('id');
+            // Hanya naik kalau parent punya id yang bagus
+            if (parentId && 
+                !parentId.startsWith('path') && 
+                !parentId.startsWith('layer') &&
+                !parentId.startsWith('g') || parentId.length > 5) {
+              targetEl = parentGroup;
+            }
+          }
+        }
+
+        highlightSvgElement(targetEl);
+        fetchLocationDetailBySvgId(targetEl.getAttribute('id'));
       });
     });
+
   } catch (err) {
     console.error('Gagal binding elemen SVG:', err);
   }
