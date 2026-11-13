@@ -67,19 +67,27 @@
   <script>
     // Skrip mandiri yang aman dan langsung merespons klik
     document.addEventListener("DOMContentLoaded", () => {
+      const toggleBtn = document.getElementById('theme-toggle');
+      if (!toggleBtn) return;
+
+      function updateThemeIcon() {
+        const isDark = document.documentElement.classList.contains('dark');
+        toggleBtn.textContent = isDark ? '☀️' : '🌙';
+      }
+
+      // Terapkan tema tersimpan
       const savedTheme = localStorage.getItem('theme') || 'light';
       if (savedTheme === 'dark') {
         document.documentElement.classList.add('dark');
       }
+      updateThemeIcon();
 
-      const toggleBtn = document.getElementById('theme-toggle');
-      if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-          document.documentElement.classList.toggle('dark');
-          const activeTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-          localStorage.setItem('theme', activeTheme);
-        });
-      }
+      toggleBtn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        const activeTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        localStorage.setItem('theme', activeTheme);
+        updateThemeIcon();
+      });
     });
   </script>
 </body>
