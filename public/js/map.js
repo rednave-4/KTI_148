@@ -99,9 +99,8 @@ async function bindSvgElements() {
           }
         }
 
-        // Prioritas khusus untuk pola Gedung- / building- / room- / facility-
         const meaningful =
-          targetEl.closest('[id^="Gedung-"], [id^="building-"], [id^="room-"], [id^="facility-"]') ||
+          targetEl.closest('[id^="Gedung-"], [id^="building-"], [id^="room-"], [id^="facility-"], [id^="Lapangan-"], [id^="Masjid-"], [id^="Parkiran-"], [id^="Pos-"], [id^="Wisma-"]') ||
           targetEl;
 
         highlightSvgElement(meaningful);
@@ -134,11 +133,13 @@ async function fetchLocationDetailBySvgId(svgElementId) {
   if (!svgElementId) return;
 
   try {
-    const response = await fetch(`/api/locations/by-svg/${encodeURIComponent(svgElementId)}`);
+    const response = await fetch(`/api/locations/search?q=${encodeURIComponent(svgElementId)}`);
     const result = await response.json();
 
-    if (result.success && result.data) {
-      const loc = result.data;
+    if (result.success && result.data && result.data.length > 0) {
+      let loc = result.data.find((item) => item.svg_element_id === svgElementId);
+      if (!loc) loc = result.data[0];
+
       typeBadge.innerText = loc.location_type || 'LOKASI';
       titleEl.innerText = loc.name;
       descEl.innerText = loc.description || 'Tidak ada deskripsi tambahan.';
@@ -148,7 +149,7 @@ async function fetchLocationDetailBySvgId(svgElementId) {
     } else {
       typeBadge.innerText = 'LOKASI';
       titleEl.innerText = svgElementId.replace(/-/g, ' ').toUpperCase();
-      descEl.innerText = 'Detail informasi lokasi ini belum terdaftar di database MySQL.';
+      descEl.innerText = 'Detail informasi lokasi ini belum terdaftar di database.';
       extraEl.innerHTML = '';
     }
   } catch (err) {
