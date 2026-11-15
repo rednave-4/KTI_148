@@ -90,3 +90,39 @@ exports.getNavigationData = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getLocationBySvgId = async (req, res, next) => {
+  try {
+    const { svgId } = req.params;
+
+    const [rows] = await pool.execute(`
+      SELECT 
+        l.location_id,
+        l.name,
+        l.location_type,
+        l.description,
+        p.name AS parent_name,
+        me.svg_element_id,
+        m.map_id,
+        m.map_name,
+        m.svg_path
+      FROM map_elements me
+      JOIN locations l ON me.location_id = l.location_id
+      LEFT JOIN locations p ON l.parent_location_id = p.location_id
+      LEFT JOIN maps m ON me.map_id = m.map_id
+      WHERE me.svg_element_id = ?
+      LIMIT 1
+    `, [svgId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Lokasi tidak ditemukan untuk elemen SVG ini.'
+      });
+    }
+
+    return res.json({ success: true, data: rows[0] });
+  } catch (error) {
+    next(error);
+  }
+};

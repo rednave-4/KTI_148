@@ -3,6 +3,7 @@ const router = express.Router();
 const locationController = require('../controllers/locationController');
 
 // Karena sudah di-mount di /api/locations, path di sini harus relatif
+router.get('/by-svg/:svgId', locationController.getLocationBySvgId);
 router.get('/', locationController.getLocations);
 router.get('/search', locationController.searchLocations);
 router.get('/:id', locationController.getLocationById);

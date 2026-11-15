@@ -3,26 +3,21 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 let currentActiveElement = null;
-let locationsMap = new Map(); // Cache mapping svg_element_id -> location data
 
 async function initMapSystem() {
   const mapSelect = document.getElementById('map-select');
   const searchInput = document.getElementById('map-search-input');
 
-  // Load awal denah berdasarkan opsi pertama
   const initialSvgPath = mapSelect.options[mapSelect.selectedIndex].getAttribute('data-svg');
   await loadSvgMap(initialSvgPath);
 
-  // Listener Perubahan Dropdown Peta
   mapSelect.addEventListener('change', async (e) => {
     const svgPath = e.target.options[e.target.selectedIndex].getAttribute('data-svg');
     await loadSvgMap(svgPath);
   });
 
-  // Setup Live Search Listener
   setupSearch(searchInput);
 
-  // Periksa apakah ada parameter location_id dari URL (contoh: dari pengumuman)
   const urlParams = new URLSearchParams(window.location.search);
   const targetLocationId = urlParams.get('location_id');
   if (targetLocationId) {
@@ -30,9 +25,6 @@ async function initMapSystem() {
   }
 }
 
-/**
- * Memuat file SVG secara asinkron menggunakan fetch() dan menyuntikkannya ke DOM
- */
 async function loadSvgMap(svgPath) {
   const container = document.getElementById('svg-container');
   container.innerHTML = '<p style="color: var(--text-light);">Memuat denah...</p>';
@@ -43,101 +35,84 @@ async function loadSvgMap(svgPath) {
 
     const svgContent = await response.text();
     container.innerHTML = svgContent;
-
-    // Bersihkan rujukan aktif sebelumnya
     currentActiveElement = null;
-
-    // Pasang listener interaksi & binding data pada elemen SVG
     await bindSvgElements();
   } catch (error) {
     console.error('Gagal memuat peta SVG:', error);
     container.innerHTML = `
       <div style="text-align: center; color: #dc2626;">
         <p>⚠️ Denah SVG belum tersedia untuk tampilan ini.</p>
-        <small style="color: var(--text-light);">Pastikan file file SVG tersimpan di folder public${svgPath}</small>
+        <small style="color: var(--text-light);">Pastikan file SVG ada di folder public${svgPath}</small>
       </div>
     `;
   }
 }
 
-/**
- * Mengambil data lokasi dari API & memasang Event Listener pada elemen SVG
- */
-/**
- * Mengambil data lokasi dari API & memasang Event Listener pada elemen SVG
- */
 async function bindSvgElements() {
   try {
-    const response = await fetch('/api/locations');
-    const result = await response.json();
-
-    if (!result.success) return;
-
     const svgRoot = document.querySelector('#svg-container svg');
     if (!svgRoot) return;
 
-    // Ambil semua elemen yang punya id
     const allElements = svgRoot.querySelectorAll('[id]');
 
-    allElements.forEach(el => {
+    allElements.forEach((el) => {
       const elementId = el.getAttribute('id');
       if (!elementId) return;
 
-      // Skip ID generik / tidak penting (path, rect, dll yang dibuat Inkscape)
+      // Skip ID generik dari Inkscape
       if (
         elementId.startsWith('path') ||
         elementId.startsWith('rect') ||
-        elementId.startsWith('g') && elementId.length < 6 || // g1, g2, dll
         elementId.startsWith('layer') ||
         elementId.startsWith('svg') ||
         elementId.startsWith('defs') ||
         elementId.startsWith('clipPath') ||
         elementId.startsWith('filter') ||
         elementId.startsWith('linearGradient') ||
-        elementId.startsWith('stop')
+        elementId.startsWith('stop') ||
+        elementId.startsWith('lpe_') ||
+        (elementId.startsWith('g') && elementId.length <= 5)
       ) {
         return;
       }
 
-      // Berikan class interaktif
       el.classList.add('map-location');
 
-      // Event click
       el.addEventListener('click', (e) => {
         e.stopPropagation();
 
-        // Cari elemen yang paling tepat untuk di-highlight
-        // Prioritas: group yang punya id bermakna
         let targetEl = el;
 
-        // Kalau yang diklik adalah path kecil, naik ke parent group
+        // Jika yang diklik path anak, naik ke group bermakna
         if (el.tagName.toLowerCase() !== 'g') {
           const parentGroup = el.closest('g[id]');
           if (parentGroup) {
-            const parentId = parentGroup.getAttribute('id');
-            // Hanya naik kalau parent punya id yang bagus
-            if (parentId && 
-                !parentId.startsWith('path') && 
-                !parentId.startsWith('layer') &&
-                !parentId.startsWith('g') || parentId.length > 5) {
+            const parentId = parentGroup.getAttribute('id') || '';
+            const isGeneric =
+              parentId.startsWith('path') ||
+              parentId.startsWith('layer') ||
+              (parentId.startsWith('g') && parentId.length <= 5);
+
+            if (parentId && !isGeneric) {
               targetEl = parentGroup;
             }
           }
         }
 
-        highlightSvgElement(targetEl);
-        fetchLocationDetailBySvgId(targetEl.getAttribute('id'));
+        // Prioritas khusus untuk pola Gedung- / building- / room- / facility-
+        const meaningful =
+          targetEl.closest('[id^="Gedung-"], [id^="building-"], [id^="room-"], [id^="facility-"]') ||
+          targetEl;
+
+        highlightSvgElement(meaningful);
+        fetchLocationDetailBySvgId(meaningful.getAttribute('id'));
       });
     });
-
   } catch (err) {
     console.error('Gagal binding elemen SVG:', err);
   }
 }
 
-/**
- * Memberikan class active untuk highlighter visual warna kuning/biru pada SVG
- */
 function highlightSvgElement(el) {
   if (currentActiveElement) {
     currentActiveElement.classList.remove('active');
@@ -146,46 +121,45 @@ function highlightSvgElement(el) {
   if (el) {
     el.classList.add('active');
     currentActiveElement = el;
-
-    // Auto-scroll ke elemen yang disorot jika keluar dari viewport
     el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
   }
 }
 
-/**
- * Mengambil informasi lokasi berdasarkan ID elemen SVG dari API pencarian/navigasi
- */
 async function fetchLocationDetailBySvgId(svgElementId) {
   const typeBadge = document.getElementById('info-type');
   const titleEl = document.getElementById('info-title');
   const descEl = document.getElementById('info-description');
   const extraEl = document.getElementById('info-extra');
 
+  if (!svgElementId) return;
+
   try {
-    const response = await fetch(`/api/locations/search?q=${encodeURIComponent(svgElementId)}`);
+    const response = await fetch(`/api/locations/by-svg/${encodeURIComponent(svgElementId)}`);
     const result = await response.json();
 
-    if (result.success && result.data.length > 0) {
-      const loc = result.data[0];
-      typeBadge.innerText = loc.location_type || 'RUANGAN';
+    if (result.success && result.data) {
+      const loc = result.data;
+      typeBadge.innerText = loc.location_type || 'LOKASI';
       titleEl.innerText = loc.name;
       descEl.innerText = loc.description || 'Tidak ada deskripsi tambahan.';
-      
-      extraEl.innerHTML = loc.parent_name ? `<p style="font-size: 0.85rem; color: var(--text-light);"><strong>Gedung/Area:</strong> ${escapeHtml(loc.parent_name)}</p>` : '';
+      extraEl.innerHTML = loc.parent_name
+        ? `<p style="font-size: 0.85rem; color: var(--text-light);"><strong>Gedung/Area:</strong> ${escapeHtml(loc.parent_name)}</p>`
+        : '';
     } else {
       typeBadge.innerText = 'LOKASI';
-      titleEl.innerText = svgElementId.replace(/^room-|^bldg-/, '').replace(/-/g, ' ').toUpperCase();
+      titleEl.innerText = svgElementId.replace(/-/g, ' ').toUpperCase();
       descEl.innerText = 'Detail informasi lokasi ini belum terdaftar di database MySQL.';
       extraEl.innerHTML = '';
     }
   } catch (err) {
     console.error('Gagal mengambil data detail lokasi:', err);
+    typeBadge.innerText = 'LOKASI';
+    titleEl.innerText = svgElementId.replace(/-/g, ' ').toUpperCase();
+    descEl.innerText = 'Gagal memuat data lokasi dari server.';
+    extraEl.innerHTML = '';
   }
 }
 
-/**
- * Menangani Pencarian Real-Time pada Search Input
- */
 function setupSearch(searchInput) {
   const dropdown = document.getElementById('search-results');
   let debounceTimeout = null;
@@ -206,12 +180,12 @@ function setupSearch(searchInput) {
 
         if (result.success && result.data.length > 0) {
           dropdown.innerHTML = '';
-          result.data.forEach(item => {
+          result.data.forEach((item) => {
             const div = document.createElement('div');
             div.className = 'search-result-item';
             div.innerHTML = `
               <strong>${escapeHtml(item.name)}</strong>
-              <small>${item.location_type} ${item.parent_name ? '• ' + escapeHtml(item.parent_name) : ''}</small>
+              <small>${item.location_type}${item.parent_name ? ' • ' + escapeHtml(item.parent_name) : ''}</small>
             `;
             div.addEventListener('click', () => {
               dropdown.style.display = 'none';
@@ -222,7 +196,8 @@ function setupSearch(searchInput) {
           });
           dropdown.style.display = 'block';
         } else {
-          dropdown.innerHTML = '<div class="search-result-item" style="color: var(--text-light);">Lokasi tidak ditemukan</div>';
+          dropdown.innerHTML =
+            '<div class="search-result-item" style="color: var(--text-light);">Lokasi tidak ditemukan</div>';
           dropdown.style.display = 'block';
         }
       } catch (err) {
@@ -231,7 +206,6 @@ function setupSearch(searchInput) {
     }, 300);
   });
 
-  // Sembunyikan dropdown ketika mengeklik di luar kolom pencarian
   document.addEventListener('click', (e) => {
     if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
       dropdown.style.display = 'none';
@@ -239,13 +213,9 @@ function setupSearch(searchInput) {
   });
 }
 
-/**
- * Melompat ke lokasi tertentu setelah dipilih dari hasil pencarian
- */
 async function navigateToLocationItem(item) {
   if (item.svg_path) {
     const mapSelect = document.getElementById('map-select');
-    // Cocokkan Opsi Dropdown Peta jika peta belum terbuka
     for (let i = 0; i < mapSelect.options.length; i++) {
       if (mapSelect.options[i].getAttribute('data-svg') === item.svg_path) {
         mapSelect.selectedIndex = i;
@@ -257,21 +227,18 @@ async function navigateToLocationItem(item) {
 
   if (item.svg_element_id) {
     const el = document.getElementById(item.svg_element_id);
-    if (el) {
-      highlightSvgElement(el);
-    }
+    if (el) highlightSvgElement(el);
   }
 
-  // Tampilkan Informasi
   document.getElementById('info-type').innerText = item.location_type || 'RUANGAN';
   document.getElementById('info-title').innerText = item.name;
-  document.getElementById('info-description').innerText = item.description || 'Tidak ada deskripsi tambahan.';
-  document.getElementById('info-extra').innerHTML = item.parent_name ? `<p style="font-size: 0.85rem; color: var(--text-light);"><strong>Gedung/Area:</strong> ${escapeHtml(item.parent_name)}</p>` : '';
+  document.getElementById('info-description').innerText =
+    item.description || 'Tidak ada deskripsi tambahan.';
+  document.getElementById('info-extra').innerHTML = item.parent_name
+    ? `<p style="font-size: 0.85rem; color: var(--text-light);"><strong>Gedung/Area:</strong> ${escapeHtml(item.parent_name)}</p>`
+    : '';
 }
 
-/**
- * Melakukan navigasi otomatis jika URL membawa query string ?location_id=X
- */
 async function navigateToLocationId(locationId) {
   try {
     const response = await fetch(`/api/locations/${locationId}/navigation`);
@@ -281,7 +248,6 @@ async function navigateToLocationId(locationId) {
       const mapInfo = result.map_info;
       const loc = result.location;
 
-      // Navigasikan ke pencarian lokasi yang relevan
       navigateToLocationItem({
         name: loc.name,
         location_type: loc.location_type,
@@ -297,5 +263,10 @@ async function navigateToLocationId(locationId) {
 
 function escapeHtml(text) {
   if (!text) return '';
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
