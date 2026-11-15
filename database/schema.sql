@@ -180,3 +180,53 @@ REPLACE INTO locations (location_id, parent_location_id, name, location_type, de
 (51, 5, 'Parkiran Selatan', 'FACILITY', 'Area parkir kendaraan bagian selatan', 52),
 (52, 5, 'Pos Punggawa 1', 'FACILITY', 'Pos satpam / keamanan utama', 53),
 (53, 5, 'Pos Punggawa 2', 'FACILITY', 'Pos satpam / keamanan kedua', 54);
+
+-- =====================================================
+-- Seed Data untuk Tabel maps
+-- =====================================================
+REPLACE INTO maps (map_id, location_id, map_name, map_type, svg_path, is_active) VALUES
+(1, 1, 'Denah Kampus Utama', 'CAMPUS', '/assets/maps/campus.svg', 1);
+
+-- =====================================================
+-- Seed Data untuk Tabel map_elements (Mapping SVG ID -> Location ID)
+-- =====================================================
+REPLACE INTO map_elements (map_id, location_id, svg_element_id) VALUES
+-- Area Akademik
+(1, 10, 'Gedung-Borneo-1'),
+(1, 11, 'Gedung-Borneo-2'),
+(1, 12, 'Gedung-Borneo-3'),
+(1, 13, 'Gedung-Kelas-Belian-1'),
+(1, 14, 'Gedung-Kelas-Belian-2'),
+(1, 15, 'Gedung-Kelas-Belian-3'),
+(1, 16, 'Gedung-Kelas-Belian-4'),
+(1, 17, 'Gedung-Bangkirai'),
+(1, 18, 'Gedung-Jepen'),
+(1, 19, 'Gedung-Keruing'),
+(1, 20, 'Gedung-Ulin'),
+(1, 21, 'Gedung-Mahakam'),
+(1, 22, 'Gedung-Pandurata'),
+(1, 23, 'Gedung-Putri-Aji'),
+(1, 24, 'Gedung-Putri-Karang-Melenu'),
+(1, 25, 'Gedung-Kresik-Luway-1'),
+(1, 26, 'Gedung-Kresik-Luway-2'),
+
+-- Area Penunjang
+(1, 30, 'Gedung-Kantin-Bekepor'),
+(1, 31, 'Masjid-Qiwwamul-Ummah'),
+(1, 32, 'Wisma-Derawan'),
+(1, 33, 'Wisma-Kumala-1'),
+(1, 34, 'Wisma-Kumala-2'),
+(1, 35, 'Wisma-Kumala-3'),
+
+-- Area Olahraga & Lapangan
+(1, 40, 'Lapangan-Upacara-1'),
+(1, 41, 'Lapangan-Upacara-2'),
+(1, 42, 'Lapangan-Bola-Cakrawala-10'),
+(1, 43, 'Lapangan-Basketball'),
+(1, 44, 'Lapangan-Volley'),
+
+-- Area Parkir & Keamanan
+(1, 50, 'Parkiran-Utara'),
+(1, 51, 'Parkiran-Selatan'),
+(1, 52, 'Pos-Punggawa-1'),
+(1, 53, 'Pos-Punggawa-2');
