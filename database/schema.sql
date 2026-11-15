@@ -123,11 +123,60 @@ CREATE TABLE IF NOT EXISTS map_elements (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
--- Seed Data untuk Tabel locations (Agar dropdown tidak kosong)
+-- Seed Data untuk Tabel locations (Hierarki SMA Negeri 10 Samarinda)
 -- =====================================================
--- Pastikan menggunakan REPLACE INTO atau INSERT IGNORE dengan ID eksplisit
 REPLACE INTO locations (location_id, parent_location_id, name, location_type, description, sort_order) VALUES
+-- 1. ROOT SCHOOL
 (1, NULL, 'SMA Negeri 10 Samarinda', 'SCHOOL', 'Komplek Utama Sekolah', 1),
-(2, 1, 'Gedung Utama / Kantor', 'BUILDING', 'Ruang Kepala Sekolah dan Tata Usaha', 2),
-(3, 1, 'Gedung Kelas Belajar', 'BUILDING', 'Area Kegiatan Belajar Mengajar (KBM)', 3),
-(4, 1, 'Aula Serbaguna', 'FACILITY', 'Tempat Acara / Pertemuan Besar', 4);
+
+-- ==========================================
+-- 2. AREA AKADEMIK & KELAS (BUILDING)
+-- ==========================================
+(2, 1, 'Area Akademik', 'BUILDING', 'Pusat kegiatan belajar mengajar utama', 10),
+(10, 2, 'Gedung Borneo 1', 'BUILDING', 'Gedung Borneo 1', 11),
+(11, 2, 'Gedung Borneo 2', 'BUILDING', 'Gedung Borneo 2', 12),
+(12, 2, 'Gedung Borneo 3', 'BUILDING', 'Gedung Borneo 3', 13),
+(13, 2, 'Gedung Kelas Belian 1', 'ROOM', 'Gedung Kelas Belian 1', 14),
+(14, 2, 'Gedung Kelas Belian 2', 'ROOM', 'Gedung Kelas Belian 2', 15),
+(15, 2, 'Gedung Kelas Belian 3', 'ROOM', 'Gedung Kelas Belian 3', 16),
+(16, 2, 'Gedung Kelas Belian 4', 'ROOM', 'Gedung Kelas Belian 4', 17),
+(17, 2, 'Gedung Bangkirai', 'BUILDING', 'Gedung Bangkirai', 18),
+(18, 2, 'Gedung Jepen', 'BUILDING', 'Gedung Jepen', 19),
+(19, 2, 'Gedung Keruing', 'BUILDING', 'Gedung Keruing', 20),
+(20, 2, 'Gedung Ulin', 'BUILDING', 'Gedung Ulin', 21),
+(21, 2, 'Gedung Mahakam', 'BUILDING', 'Gedung Mahakam', 22),
+(22, 2, 'Gedung Pandurata', 'BUILDING', 'Gedung Pandurata', 23),
+(23, 2, 'Gedung Putri Aji', 'BUILDING', 'Gedung Putri Aji', 24),
+(24, 2, 'Gedung Putri Karang Melenu', 'BUILDING', 'Gedung Putri Karang Melenu', 25),
+(25, 2, 'Gedung Kresik Luway 1', 'BUILDING', 'Gedung Kresik Luway 1', 26),
+(26, 2, 'Gedung Kresik Luway 2', 'BUILDING', 'Gedung Kresik Luway 2', 27),
+
+-- ==========================================
+-- 3. AREA PENUNJANG (FACILITY / BUILDING)
+-- ==========================================
+(3, 1, 'Area Penunjang', 'BUILDING', 'Fasilitas pendukung sekolah', 30),
+(30, 3, 'Gedung Kantin Bekepor', 'FACILITY', 'Pusat kuliner dan kantin sekolah', 31),
+(31, 3, 'Masjid Qiwwamul Ummah', 'FACILITY', 'Tempat ibadah utama warga sekolah', 32),
+(32, 3, 'Wisma Derawan', 'BUILDING', 'Asrama / Wisma Derawan', 33),
+(33, 3, 'Wisma Kumala 1', 'BUILDING', 'Asrama / Wisma Kumala 1', 34),
+(34, 3, 'Wisma Kumala 2', 'BUILDING', 'Asrama / Wisma Kumala 2', 35),
+(35, 3, 'Wisma Kumala 3', 'BUILDING', 'Asrama / Wisma Kumala 3', 36),
+
+-- ==========================================
+-- 4. AREA OLAHRAGA & LAPANGAN (FACILITY)
+-- ==========================================
+(4, 1, 'Area Olahraga & Lapangan', 'BUILDING', 'Zona olahraga dan lapangan terbuka', 40),
+(40, 4, 'Lapangan Upacara 1', 'FACILITY', 'Lapangan utama upacara bendera', 41),
+(41, 4, 'Lapangan Upacara 2', 'FACILITY', 'Lapangan pendukung upacara', 42),
+(42, 4, 'Lapangan Bola Cakrawala 10', 'FACILITY', 'Lapangan sepak bola sekolah', 43),
+(43, 4, 'Lapangan Basketball', 'FACILITY', 'Lapangan basket sekolah', 44),
+(44, 4, 'Lapangan Volley', 'FACILITY', 'Lapangan bola voli sekolah', 45),
+
+-- ==========================================
+-- 5. AREA PARKIR & KEAMANAN (FACILITY)
+-- ==========================================
+(5, 1, 'Area Parkir & Keamanan', 'BUILDING', 'Zona kendaraan dan pos pengamanan', 50),
+(50, 5, 'Parkiran Utara', 'FACILITY', 'Area parkir kendaraan bagian utara', 51),
+(51, 5, 'Parkiran Selatan', 'FACILITY', 'Area parkir kendaraan bagian selatan', 52),
+(52, 5, 'Pos Punggawa 1', 'FACILITY', 'Pos satpam / keamanan utama', 53),
+(53, 5, 'Pos Punggawa 2', 'FACILITY', 'Pos satpam / keamanan kedua', 54);
