@@ -1830,4 +1830,177 @@
         });
     </script>
 </body>
+</html><!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secret Chess Arena - SMARIDASA</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Socket.io Client (Otomatis disediakan oleh server Express) -->
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    .chess-board { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); width: 100%; max-width: 450px; aspect-ratio: 1/1; border: 4px solid #374151; }
+    .square { display: flex; align-items: center; justify-content: center; font-size: 2.5rem; cursor: pointer; user-select: none; }
+    .light { background-color: #f3f4f6; }
+    .dark { background-color: #9ca3af; }
+    .selected { background-color: #fde047 !important; }
+  </style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex flex-col items-center justify-center p-4">
+
+  <div class="max-w-md w-full bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 text-center">
+    <h1 class="text-2xl font-bold mb-2 text-indigo-400">♟️ Secret Chess Online</h1>
+    <p class="text-slate-400 text-sm mb-6">Terhubung ke Server Database Sekolah</p>
+
+    <!-- Menu Lobi -->
+    <div id="lobby-menu" class="space-y-4">
+      <button onclick="hostGame()" class="w-full bg-indigo-600 hover:bg-indigo-500 font-semibold py-3 rounded-xl transition shadow-lg">Buat Room Baru (Putih)</button>
+      <div class="flex gap-2">
+        <input type="text" id="room-code-input" placeholder="KODE ROOM" class="flex-1 bg-slate-900 border border-slate-700 px-4 rounded-xl uppercase tracking-widest text-center font-bold text-lg text-amber-400 focus:outline-none focus:border-indigo-500">
+        <button onclick="joinGame()" class="bg-emerald-600 hover:bg-emerald-500 font-semibold px-6 py-3 rounded-xl transition shadow-lg">Gabung</button>
+      </div>
+    </div>
+
+    <!-- Area Game -->
+    <div id="game-container" class="hidden flex flex-col items-center">
+      <div id="room-info" class="mb-3 text-sm bg-slate-900 px-4 py-1.5 rounded-full border border-slate-700 text-indigo-300 font-mono"></div>
+      <div id="status-text" class="mb-4 font-medium text-amber-400 text-sm">Menyiapkan papan...</div>
+      
+      <!-- Papan Catur -->
+      <div id="board" class="chess-board rounded-lg overflow-hidden shadow-2xl mb-4"></div>
+      
+      <button onclick="location.reload()" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 px-4 py-2 rounded-lg transition">Keluar / Reset Room</button>
+    </div>
+  </div>
+
+  <script>
+    const socket = io();
+    let currentRoom = null;
+    let myColor = 'w';
+    let boardState = [];
+    let selectedSquare = null;
+    let turn = 'w';
+
+    const initialSetup = [
+      ['r','n','b','q','k','b','n','r'],
+      ['p','p','p','p','p','p','p','p'],
+      ['','','','','','','',''],
+      ['','','','','','','',''],
+      ['','','','','','','',''],
+      ['','','','','','','',''],
+      ['P','P','P','P','P','P','P','P'],
+      ['R','N','B','Q','K','B','N','R']
+    ];
+
+    function hostGame() {
+      boardState = JSON.parse(JSON.stringify(initialSetup));
+      socket.emit('createRoom', boardState, (res) => {
+        if (res.success) {
+          currentRoom = res.roomCode;
+          myColor = res.color;
+          setupGameUI(`Room: ${currentRoom} (Menunggu Lawan...)`);
+          renderBoard();
+        } else {
+          alert(res.message);
+        }
+      });
+    }
+
+    function joinGame() {
+      const code = document.getElementById('room-code-input').value.toUpperCase().trim();
+      if (!code) return alert('Masukkan kode room terlebih dahulu!');
+      
+      socket.emit('joinRoom', code, (res) => {
+        if (res.success) {
+          currentRoom = res.roomCode;
+          myColor = res.color;
+          boardState = res.gameState;
+          setupGameUI(`Room: ${currentRoom} (Terhubung)`);
+          renderBoard();
+        } else {
+          alert(res.message);
+        }
+      });
+    }
+
+    function setupGameUI(infoText) {
+      document.getElementById('lobby-menu').classList.add('hidden');
+      document.getElementById('game-container').classList.remove('hidden');
+      document.getElementById('room-info').innerText = infoText;
+    }
+
+    const pieceSymbols = {
+      'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟',
+      'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔', 'P': '♙'
+    };
+
+    function renderBoard() {
+      const boardEl = document.getElementById('board');
+      boardEl.innerHTML = '';
+      
+      const isBlack = myColor === 'b';
+      const rows = isBlack ? [7,6,5,4,3,2,1,0] : [0,1,2,3,4,5,6,7];
+      const cols = isBlack ? [7,6,5,4,3,2,1,0] : [0,1,2,3,4,5,6,7];
+
+      rows.forEach(r => {
+        cols.forEach(c => {
+          const square = document.createElement('div');
+          const isDark = (r + c) % 2 === 1;
+          square.className = `square ${isDark ? 'dark' : 'light'}`;
+          square.dataset.row = r;
+          square.dataset.col = c;
+          
+          const piece = boardState[r][c];
+          if (piece) {
+            square.innerText = pieceSymbols[piece] || piece;
+          }
+
+          square.addEventListener('click', () => handleSquareClick(r, c));
+          boardEl.appendChild(square);
+        });
+      });
+
+      document.getElementById('status-text').innerText = (turn === myColor) ? "🟢 Giliran Anda!" : "⏳ Menunggu langkah lawan...";
+    }
+
+    function handleSquareClick(r, c) {
+      if (turn !== myColor) return;
+
+      const piece = boardState[r][c];
+      
+      if (selectedSquare) {
+        const [fromR, fromC] = selectedSquare;
+        
+        // Pindahkan bidak
+        boardState[r][c] = boardState[fromR][fromC];
+        boardState[fromR][fromC] = '';
+        selectedSquare = null;
+        
+        turn = turn === 'w' ? 'b' : 'w';
+        renderBoard();
+
+        // Sinkronisasi ke server & database MySQL
+        socket.emit('syncMove', { roomCode: currentRoom, gameState: boardState });
+      } else if (piece && ((myColor === 'w' && piece === piece.toUpperCase()) || (myColor === 'b' && piece === piece.toLowerCase()))) {
+        selectedSquare = [r, c];
+        renderBoard();
+        const selectedEl = document.querySelector(`[data-row='${r}'][data-col='${c}']`);
+        if (selectedEl) selectedEl.classList.add('selected');
+      }
+    }
+
+    socket.on('opponentJoined', () => {
+      document.getElementById('room-info').innerText = `Room: ${currentRoom} (Lawan Bergabung!)`;
+      document.getElementById('status-text').innerText = "🟢 Lawan sudah masuk. Giliran Putih melangkah!";
+    });
+
+    socket.on('boardUpdated', (newGameState) => {
+      boardState = newGameState;
+      turn = turn === 'w' ? 'b' : 'w';
+      renderBoard();
+    });
+  </script>
+</body>
 </html>
