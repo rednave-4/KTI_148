@@ -230,3 +230,12 @@ REPLACE INTO map_elements (map_id, location_id, svg_element_id) VALUES
 (1, 51, 'Parkiran-Selatan'),
 (1, 52, 'Pos-Punggawa-1'),
 (1, 53, 'Pos-Punggawa-2');
+
+
+CREATE TABLE IF NOT EXISTS chess_rooms (
+  room_code VARCHAR(10) PRIMARY KEY,
+  game_state JSON NOT NULL,
+  white_connected BOOLEAN DEFAULT TRUE,
+  black_connected BOOLEAN DEFAULT FALSE,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
