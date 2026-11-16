@@ -132,3 +132,31 @@
   font-weight: 600;
   margin-bottom: 0.5rem;
 }
+
+.svg-viewport {
+  overflow: hidden; /* penting agar denah tidak keluar area */
+  position: relative;
+  touch-action: none; /* biar drag di HP lebih stabil */
+}
+
+#svg-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform-origin: center center;
+  transition: transform 0.15s ease;
+  cursor: grab;
+}
+
+#svg-container.dragging {
+  cursor: grabbing;
+  transition: none;
+}
+
+#svg-container svg {
+  max-width: 100%;
+  height: auto;
+  user-select: none;
+}

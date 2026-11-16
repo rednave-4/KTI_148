@@ -17,6 +17,7 @@ async function initMapSystem() {
   });
 
   setupSearch(searchInput);
+  setupZoomAndPan();
 
   const urlParams = new URLSearchParams(window.location.search);
   const targetLocationId = urlParams.get('location_id');
@@ -35,6 +36,7 @@ async function loadSvgMap(svgPath) {
 
     const svgContent = await response.text();
     container.innerHTML = svgContent;
+    resetZoom();
     currentActiveElement = null;
     await bindSvgElements();
   } catch (error) {
@@ -270,4 +272,99 @@ function escapeHtml(text) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+let currentScale = 1;
+let currentX = 0;
+let currentY = 0;
+let isDragging = false;
+let startX = 0;
+let startY = 0;
+
+function applyTransform() {
+  const container = document.getElementById('svg-container');
+  if (!container) return;
+  container.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentScale})`;
+}
+
+function zoomIn() {
+  currentScale = Math.min(currentScale + 0.2, 4); // max 4x
+  applyTransform();
+}
+
+function zoomOut() {
+  currentScale = Math.max(currentScale - 0.2, 0.5); // min 0.5x
+  applyTransform();
+}
+
+function resetZoom() {
+  currentScale = 1;
+  currentX = 0;
+  currentY = 0;
+  applyTransform();
+}
+
+function setupZoomAndPan() {
+  const zoomInBtn = document.getElementById('zoom-in-btn');
+  const zoomOutBtn = document.getElementById('zoom-out-btn');
+  const zoomResetBtn = document.getElementById('zoom-reset-btn');
+  const container = document.getElementById('svg-container');
+  const viewport = document.querySelector('.svg-viewport');
+
+  if (zoomInBtn) zoomInBtn.addEventListener('click', zoomIn);
+  if (zoomOutBtn) zoomOutBtn.addEventListener('click', zoomOut);
+  if (zoomResetBtn) zoomResetBtn.addEventListener('click', resetZoom);
+
+  if (!container || !viewport) return;
+
+  // Scroll untuk zoom
+  viewport.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    if (e.deltaY < 0) zoomIn();
+    else zoomOut();
+  }, { passive: false });
+
+  // Drag untuk pan
+  container.addEventListener('mousedown', (e) => {
+    // Jangan drag kalau klik elemen lokasi
+    if (e.target.closest('.map-location')) return;
+
+    isDragging = true;
+    startX = e.clientX - currentX;
+    startY = e.clientY - currentY;
+    container.classList.add('dragging');
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    currentX = e.clientX - startX;
+    currentY = e.clientY - startY;
+    applyTransform();
+  });
+
+  window.addEventListener('mouseup', () => {
+    isDragging = false;
+    container.classList.remove('dragging');
+  });
+
+  // Support touch (HP)
+  container.addEventListener('touchstart', (e) => {
+    if (e.target.closest('.map-location')) return;
+    if (e.touches.length !== 1) return;
+
+    isDragging = true;
+    startX = e.touches[0].clientX - currentX;
+    startY = e.touches[0].clientY - currentY;
+  }, { passive: true });
+
+  window.addEventListener('touchmove', (e) => {
+    if (!isDragging || e.touches.length !== 1) return;
+    currentX = e.touches[0].clientX - startX;
+    currentY = e.touches[0].clientY - startY;
+    applyTransform();
+  }, { passive: true });
+
+  window.addEventListener('touchend', () => {
+    isDragging = false;
+  });
 }
