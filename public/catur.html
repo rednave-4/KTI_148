@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catur Klasik 2 Pemain</title>
+    <title>Catur Online Multiplayer</title>
     <!-- Memuat Tailwind CSS untuk tata letak responsif dan modern -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Memuat Google Fonts 'Inter' -->
@@ -22,9 +22,9 @@
         /* Kontainer Papan Catur dengan rasio 1:1 yang responsif */
         .board-wrapper {
             width: 100%;
-            max-width: min(88vw, 560px);
+            max-width: min(88vw, 540px);
             aspect-ratio: 1 / 1;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 0 8px #334155, 0 0 0 10px #475569;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 0 8px #334155, 0 0 0 10px #475569;
             border-radius: 8px;
             overflow: hidden;
             position: relative;
@@ -49,13 +49,13 @@
             transition: background-color 0.15s ease;
         }
 
-        /* Warna kotak terang dan gelap (Tema Zamrud / Slate Modern) */
+        /* Tema Papan Zamrud & Krem Modern */
         .square.light {
-            background-color: #e2e8f0;
+            background-color: #ecfdf5;
         }
 
         .square.dark {
-            background-color: #64748b;
+            background-color: #059669;
         }
 
         /* Sorotan kotak yang dipilih */
@@ -65,7 +65,7 @@
 
         /* Sorotan langkah terakhir (asal & tujuan) */
         .square.last-move {
-            background-color: rgba(250, 204, 21, 0.45);
+            background-color: rgba(250, 204, 21, 0.5);
         }
 
         /* Sorotan Raja dalam kondisi Skak */
@@ -83,7 +83,7 @@
         .valid-move-dot {
             width: 28%;
             height: 28%;
-            background-color: rgba(15, 23, 42, 0.28);
+            background-color: rgba(15, 23, 42, 0.3);
             border-radius: 50%;
             pointer-events: none;
             transition: transform 0.15s ease;
@@ -91,14 +91,14 @@
 
         .square:hover .valid-move-dot {
             transform: scale(1.25);
-            background-color: rgba(15, 23, 42, 0.45);
+            background-color: rgba(15, 23, 42, 0.5);
         }
 
         /* Indikator langkah valid memakan bidak (cincin di pinggir kotak) */
         .valid-capture-ring {
             position: absolute;
             inset: 6%;
-            border: 4px solid rgba(220, 38, 38, 0.65);
+            border: 4px solid rgba(220, 38, 38, 0.75);
             border-radius: 50%;
             pointer-events: none;
         }
@@ -109,7 +109,7 @@
             height: 82%;
             z-index: 10;
             pointer-events: none;
-            filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.4));
+            filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.45));
             transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
@@ -144,12 +144,12 @@
 
         .square.light .coord-rank,
         .square.light .coord-file {
-            color: #475569;
+            color: #047857;
         }
 
         .square.dark .coord-rank,
         .square.dark .coord-file {
-            color: #e2e8f0;
+            color: #d1fae5;
         }
 
         /* Custom Scrollbar untuk riwayat langkah */
@@ -185,151 +185,357 @@
 </head>
 <body class="flex flex-col items-center justify-center p-3 sm:p-6">
 
-    <!-- Header Judul -->
-    <header class="w-full max-w-5xl flex flex-col sm:flex-row items-center justify-between mb-4 gap-2">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-slate-900 shadow-lg font-bold text-2xl">
-                ♔
-            </div>
-            <div>
-                <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">Catur Klasik 2 Pemain</h1>
-                <p class="text-xs text-slate-400">Mode Pass & Play • Aturan Standar FIDE</p>
-            </div>
+    <!-- Notifikasi Toast Mengambang -->
+    <div id="toast-notification" class="fixed top-4 right-4 z-50 hidden transform transition-all duration-300 translate-y-[-10px] opacity-0">
+        <div id="toast-content" class="px-4 py-3 rounded-xl bg-slate-800 border border-slate-600 text-white text-xs sm:text-sm font-semibold shadow-2xl flex items-center gap-2.5">
+            <span id="toast-icon">ℹ️</span>
+            <span id="toast-message">Pesan notifikasi</span>
         </div>
+    </div>
 
-        <!-- Banner Status Permainan / Skak / Giliran -->
-        <div id="status-banner" class="px-4 py-2 rounded-xl bg-slate-800/90 border border-slate-700 flex items-center gap-3 shadow-md">
-            <span id="turn-indicator-dot" class="w-3.5 h-3.5 rounded-full bg-white shadow-[0_0_8px_#fff]"></span>
-            <span id="status-text" class="text-sm sm:text-base font-bold text-slate-100">Giliran: Putih</span>
-        </div>
-    </header>
-
-    <!-- Kontainer Utama: Papan di Kiri/Atas, Panel Info di Kanan/Bawah -->
-    <main class="w-full max-w-5xl flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6">
-        
-        <!-- Bagian Kiri: Info Pemain Atas, Papan Catur, Info Pemain Bawah -->
-        <div class="flex flex-col items-center w-full lg:w-auto">
-            
-            <!-- Bar Pemain Atas (Default: Hitam) -->
-            <div id="top-player-bar" class="w-full max-w-[min(88vw,560px)] flex items-center justify-between bg-slate-800/80 border border-slate-700/80 rounded-xl px-3.5 py-2 mb-2.5 shadow">
-                <div class="flex items-center gap-2.5">
-                    <div id="top-player-avatar" class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-600 flex items-center justify-center text-lg shadow-inner">
-                        ♚
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span id="top-player-name" class="text-sm font-bold text-slate-200">Pemain Hitam</span>
-                            <span id="top-player-badge" class="hidden text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40">Giliran</span>
-                        </div>
-                        <div id="top-captured-list" class="flex flex-wrap items-center gap-0.5 min-h-[20px] mt-0.5"></div>
-                    </div>
+    <!-- =========================================================================
+         LAYAR 1: LOBBY MULTIPLAYER & MODE LOKAL
+         ========================================================================= -->
+    <section id="lobby-screen" class="w-full max-w-lg my-auto">
+        <div class="bg-slate-800/90 backdrop-blur-md border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl">
+            <!-- Header Lobi -->
+            <div class="text-center mb-7">
+                <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-slate-950 shadow-lg text-4xl font-extrabold">
+                    ♔
                 </div>
-                <div id="top-material-advantage" class="text-xs font-bold text-emerald-400"></div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Catur Online Multiplayer</h1>
+                <p class="text-xs sm:text-sm text-slate-400 mt-1">Mainkan catur secara real-time bersama teman atau dalam satu perangkat</p>
+                
+                <!-- Indikator Status Koneksi Server -->
+                <div class="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/80 border border-slate-700/80 text-[11px] text-slate-300">
+                    <span id="server-status-dot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span id="server-status-text">Menghubungkan ke server online...</span>
+                </div>
             </div>
 
-            <!-- Papan Catur 8x8 -->
-            <div class="board-wrapper">
-                <div id="chess-board" class="chess-board"></div>
-
-                <!-- Overlay Modal Promosi Pion -->
-                <div id="promotion-modal" class="hidden absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-30 flex flex-col items-center justify-center p-4">
-                    <div class="bg-slate-800 border border-slate-600 rounded-2xl p-5 shadow-2xl text-center max-w-xs w-full">
-                        <h3 class="text-base font-bold text-white mb-1">Promosi Pion!</h3>
-                        <p class="text-xs text-slate-300 mb-4">Pilih bidak pengganti:</p>
-                        <div id="promotion-choices" class="grid grid-cols-4 gap-2">
-                            <!-- Tombol pilihan diisi melalui JS -->
+            <!-- 3 Pilihan Mode Permainan -->
+            <div class="space-y-4">
+                <!-- Opsi 1: Buat Room Baru (Putih) -->
+                <div class="p-4 rounded-2xl bg-slate-900/70 border border-slate-700/80 hover:border-emerald-500/50 transition">
+                    <div class="flex items-start justify-between gap-3 mb-3">
+                        <div>
+                            <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                                <span>🌐 Buat Room Baru</span>
+                                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-900">Putih</span>
+                            </h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Buat kode room 6 karakter dan bagikan ke lawan Anda.</p>
                         </div>
                     </div>
+                    <button id="btn-create-room" onclick="createOnlineRoom()" disabled class="game-btn w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-sm flex items-center justify-center gap-2">
+                        <span>Buat Room Baru (Main Online - Putih)</span>
+                    </button>
                 </div>
 
-                <!-- Overlay Modal Akhir Permainan (Skakmat / Remis) -->
-                <div id="gameover-modal" class="hidden absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-30 flex flex-col items-center justify-center p-4">
-                    <div class="bg-slate-800 border border-slate-600 rounded-2xl p-6 shadow-2xl text-center max-w-xs w-full transform transition-all">
-                        <div id="gameover-icon" class="text-5xl mb-3">🏆</div>
-                        <h2 id="gameover-title" class="text-xl font-extrabold text-white mb-1">Skakmat!</h2>
-                        <p id="gameover-subtitle" class="text-sm text-slate-300 mb-5">Pemain Putih Memenangkan Pertandingan</p>
-                        <button onclick="resetGame()" class="game-btn w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-sm">
-                            Main Lagi
+                <!-- Opsi 2: Gabung Room (Hitam) -->
+                <div class="p-4 rounded-2xl bg-slate-900/70 border border-slate-700/80 hover:border-sky-500/50 transition">
+                    <div class="mb-3">
+                        <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                            <span>🔑 Gabung Room</span>
+                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-600">Hitam</span>
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Masukkan kode room 6 karakter dari teman Anda.</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input id="input-room-code" type="text" maxlength="6" placeholder="KODE ROOM" class="w-full sm:w-40 px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-600 focus:border-sky-400 focus:outline-none text-center font-mono text-base font-extrabold tracking-widest uppercase text-white placeholder-slate-600" />
+                        <button id="btn-join-room" onclick="joinOnlineRoom()" disabled class="game-btn flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm">
+                            Gabung Room (Hitam)
                         </button>
                     </div>
+                    <p id="lobby-error-msg" class="hidden text-xs text-rose-400 font-medium mt-2"></p>
                 </div>
-            </div>
 
-            <!-- Bar Pemain Bawah (Default: Putih) -->
-            <div id="bottom-player-bar" class="w-full max-w-[min(88vw,560px)] flex items-center justify-between bg-slate-800/80 border border-slate-700/80 rounded-xl px-3.5 py-2 mt-2.5 shadow">
-                <div class="flex items-center gap-2.5">
-                    <div id="bottom-player-avatar" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-900 border border-slate-300 flex items-center justify-center text-lg shadow-inner">
-                        ♔
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span id="bottom-player-name" class="text-sm font-bold text-slate-200">Pemain Putih</span>
-                            <span id="bottom-player-badge" class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40">Giliran</span>
-                        </div>
-                        <div id="bottom-captured-list" class="flex flex-wrap items-center gap-0.5 min-h-[20px] mt-0.5"></div>
-                    </div>
+                <!-- Pembatas -->
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t border-slate-700"></div>
+                    <span class="flex-shrink mx-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">Atau Offline</span>
+                    <div class="flex-grow border-t border-slate-700"></div>
                 </div>
-                <div id="bottom-material-advantage" class="text-xs font-bold text-emerald-400"></div>
+
+                <!-- Opsi 3: Main Lokal (1 Perangkat) -->
+                <button onclick="startLocalGame()" class="game-btn w-full py-3 px-4 rounded-2xl bg-slate-700/90 hover:bg-slate-600 border border-slate-600 text-slate-100 font-bold text-sm flex items-center justify-center gap-2">
+                    <span>📱 Main Lokal (2 Pemain 1 Perangkat)</span>
+                </button>
             </div>
         </div>
+    </section>
 
-        <!-- Bagian Kanan: Kontrol Tombol & Riwayat Langkah -->
-        <aside class="w-full max-w-[min(88vw,560px)] lg:w-80 flex flex-col gap-4">
+    <!-- =========================================================================
+         LAYAR 2: ARENA PERMAINAN CATUR (ONLINE & LOKAL)
+         ========================================================================= -->
+    <div id="game-screen" class="hidden w-full max-w-5xl flex-col items-center">
+        
+        <!-- Header Judul & Info Room -->
+        <header class="w-full flex flex-col md:flex-row items-center justify-between mb-4 gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-slate-950 shadow-lg font-bold text-2xl">
+                    ♔
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white">Catur Online Multiplayer</h1>
+                        <span id="mode-badge" class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">Online</span>
+                    </div>
+                    <p id="role-subtitle" class="text-xs text-slate-400">Anda bermain sebagai Putih</p>
+                </div>
+            </div>
+
+            <!-- Panel Kode Room (Hanya muncul di Mode Online) -->
+            <div id="room-code-bar" class="hidden flex items-center gap-2 bg-slate-800/95 border border-slate-700 px-3.5 py-2 rounded-xl shadow-md">
+                <div class="text-xs text-slate-400">Kode Room:</div>
+                <span id="display-room-code" class="font-mono text-base font-extrabold tracking-widest text-amber-400 select-all">------</span>
+                <button onclick="copyRoomCode()" class="ml-1 px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold flex items-center gap-1 transition" title="Salin Kode Room">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    <span>Salin</span>
+                </button>
+            </div>
+
+            <!-- Banner Status Permainan / Giliran -->
+            <div id="status-banner" class="px-4 py-2 rounded-xl bg-slate-800/90 border border-slate-700 flex items-center gap-3 shadow-md">
+                <span id="turn-indicator-dot" class="w-3.5 h-3.5 rounded-full bg-white shadow-[0_0_8px_#fff]"></span>
+                <span id="status-text" class="text-sm sm:text-base font-bold text-slate-100">Giliran: Putih</span>
+            </div>
+        </header>
+
+        <!-- Kontainer Utama: Papan di Kiri/Atas, Panel Info di Kanan/Bawah -->
+        <main class="w-full flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6">
             
-            <!-- Panel Tombol Kontrol -->
-            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow-lg">
-                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Kontrol Permainan</h2>
-                <div class="grid grid-cols-3 gap-2.5">
-                    <button id="btn-undo" onclick="undoMove()" disabled class="game-btn flex flex-col items-center justify-center gap-1 py-2.5 px-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-100 font-semibold text-xs border border-slate-600">
-                        <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
-                        <span>Undo</span>
-                    </button>
-
-                    <button id="btn-flip" onclick="flipBoard()" class="game-btn flex flex-col items-center justify-center gap-1 py-2.5 px-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-100 font-semibold text-xs border border-slate-600">
-                        <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
-                        <span>Putar Papan</span>
-                    </button>
-
-                    <button id="btn-reset" onclick="confirmReset()" class="game-btn flex flex-col items-center justify-center gap-1 py-2.5 px-2 rounded-xl bg-rose-600/90 hover:bg-rose-500 text-white font-semibold text-xs border border-rose-500">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                        <span>Reset Game</span>
-                    </button>
+            <!-- Bagian Kiri: Info Pemain Atas, Papan Catur, Info Pemain Bawah -->
+            <div class="flex flex-col items-center w-full lg:w-auto">
+                
+                <!-- Bar Pemain Atas (Lawan di mode online) -->
+                <div id="top-player-bar" class="w-full max-w-[min(88vw,540px)] flex items-center justify-between bg-slate-800/80 border border-slate-700/80 rounded-xl px-3.5 py-2 mb-2.5 shadow">
+                    <div class="flex items-center gap-2.5">
+                        <div id="top-player-avatar" class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-600 flex items-center justify-center text-lg shadow-inner">
+                            ♚
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span id="top-player-name" class="text-sm font-bold text-slate-200">Pemain Hitam</span>
+                                <span id="top-player-badge" class="hidden text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40">Giliran</span>
+                            </div>
+                            <div id="top-captured-list" class="flex flex-wrap items-center gap-0.5 min-h-[20px] mt-0.5"></div>
+                        </div>
+                    </div>
+                    <div id="top-material-advantage" class="text-xs font-bold text-emerald-400"></div>
                 </div>
 
-                <!-- Kotak Konfirmasi Reset (Menggantikan alert/confirm) -->
-                <div id="reset-confirm-box" class="hidden mt-3 p-3 rounded-xl bg-slate-900/90 border border-rose-500/50 flex items-center justify-between gap-2">
-                    <span class="text-xs text-slate-200 font-medium">Mulai ulang permainan?</span>
-                    <div class="flex gap-1.5">
-                        <button onclick="resetGame()" class="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold">Ya</button>
-                        <button onclick="cancelReset()" class="px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold">Batal</button>
+                <!-- Papan Catur 8x8 -->
+                <div class="board-wrapper">
+                    <div id="chess-board" class="chess-board"></div>
+
+                    <!-- Overlay Menunggu Lawan Bergabung (Mode Online Putih) -->
+                    <div id="waiting-opponent-overlay" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-sm z-20 flex flex-col items-center justify-center p-5 text-center">
+                        <div class="bg-slate-800/95 border border-slate-600 rounded-2xl p-6 shadow-2xl max-w-xs w-full">
+                            <div class="w-12 h-12 mx-auto mb-3 rounded-full border-4 border-emerald-500/30 border-t-emerald-400 animate-spin"></div>
+                            <h3 class="text-base font-extrabold text-white mb-1">Menunggu Lawan Bergabung...</h3>
+                            <p class="text-xs text-slate-300 mb-4">Bagikan kode room ini kepada teman Anda untuk mulai bermain:</p>
+                            <div class="flex items-center justify-center gap-2 bg-slate-950 border border-slate-700 rounded-xl py-2.5 px-3 mb-4">
+                                <span id="overlay-room-code" class="font-mono text-2xl font-extrabold tracking-widest text-amber-400">------</span>
+                                <button onclick="copyRoomCode()" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">
+                                    Salin
+                                </button>
+                            </div>
+                            <button onclick="leaveRoomToLobby()" class="text-xs text-slate-400 hover:text-rose-400 underline font-medium">
+                                Batalkan & Kembali ke Lobi
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Overlay Modal Promosi Pion -->
+                    <div id="promotion-modal" class="hidden absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-30 flex flex-col items-center justify-center p-4">
+                        <div class="bg-slate-800 border border-slate-600 rounded-2xl p-5 shadow-2xl text-center max-w-xs w-full">
+                            <h3 class="text-base font-bold text-white mb-1">Promosi Pion!</h3>
+                            <p class="text-xs text-slate-300 mb-4">Pilih bidak pengganti:</p>
+                            <div id="promotion-choices" class="grid grid-cols-4 gap-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Overlay Modal Akhir Permainan (Skakmat / Remis / Menyerah) -->
+                    <div id="gameover-modal" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-sm z-30 flex flex-col items-center justify-center p-4">
+                        <div class="bg-slate-800 border border-slate-600 rounded-2xl p-6 shadow-2xl text-center max-w-xs w-full">
+                            <div id="gameover-icon" class="text-5xl mb-3">🏆</div>
+                            <h2 id="gameover-title" class="text-xl font-extrabold text-white mb-1">Skakmat!</h2>
+                            <p id="gameover-subtitle" class="text-sm text-slate-300 mb-5">Pemain Putih Memenangkan Pertandingan</p>
+                            <div class="flex flex-col gap-2">
+                                <button id="btn-play-again-local" onclick="resetLocalGame()" class="game-btn w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-sm">
+                                    Main Lagi
+                                </button>
+                                <button onclick="leaveRoomToLobby()" class="game-btn w-full py-2.5 px-4 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-100 font-bold text-sm">
+                                    Kembali ke Lobi
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Bar Pemain Bawah (Anda di mode online) -->
+                <div id="bottom-player-bar" class="w-full max-w-[min(88vw,540px)] flex items-center justify-between bg-slate-800/80 border border-slate-700/80 rounded-xl px-3.5 py-2 mt-2.5 shadow">
+                    <div class="flex items-center gap-2.5">
+                        <div id="bottom-player-avatar" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-900 border border-slate-300 flex items-center justify-center text-lg shadow-inner">
+                            ♔
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span id="bottom-player-name" class="text-sm font-bold text-slate-200">Pemain Putih</span>
+                                <span id="bottom-player-badge" class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40">Giliran</span>
+                            </div>
+                            <div id="bottom-captured-list" class="flex flex-wrap items-center gap-0.5 min-h-[20px] mt-0.5"></div>
+                        </div>
+                    </div>
+                    <div id="bottom-material-advantage" class="text-xs font-bold text-emerald-400"></div>
+                </div>
             </div>
 
-            <!-- Panel Riwayat Langkah (Move History) -->
-            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow-lg flex flex-col h-64 lg:h-[360px]">
-                <div class="flex items-center justify-between mb-2.5">
-                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Riwayat Langkah</h2>
-                    <span id="move-count-badge" class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-slate-700 text-slate-300">0 Langkah</span>
-                </div>
+            <!-- Bagian Kanan: Kontrol Tombol & Riwayat Langkah -->
+            <aside class="w-full max-w-[min(88vw,540px)] lg:w-80 flex flex-col gap-4">
                 
-                <!-- Header Kolom Tabel -->
-                <div class="grid grid-cols-12 text-[11px] font-bold text-slate-400 pb-1.5 border-b border-slate-700 px-2">
-                    <div class="col-span-2">#</div>
-                    <div class="col-span-5">Putih</div>
-                    <div class="col-span-5">Hitam</div>
+                <!-- Panel Tombol Kontrol -->
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow-lg">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Kontrol Permainan</h2>
+                    
+                    <!-- Kontrol Khusus Mode Lokal -->
+                    <div id="local-controls" class="grid grid-cols-3 gap-2">
+                        <button id="btn-undo" onclick="undoLocalMove()" disabled class="game-btn flex flex-col items-center justify-center gap-1 py-2.5 px-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-100 font-semibold text-xs border border-slate-600">
+                            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+                            <span>Undo</span>
+                        </button>
+
+                        <button onclick="flipBoard()" class="game-btn flex flex-col items-center justify-center gap-1 py-2.5 px-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-100 font-semibold text-xs border border-slate-600">
+                            <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                            <span>Putar</span>
+                        </button>
+
+                        <button onclick="confirmAction('reset')" class="game-btn flex flex-col items-center justify-center gap-1 py-2.5 px-2 rounded-xl bg-rose-600/90 hover:bg-rose-500 text-white font-semibold text-xs border border-rose-500">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            <span>Reset</span>
+                        </button>
+                    </div>
+
+                    <!-- Kontrol Khusus Mode Online -->
+                    <div id="online-controls" class="hidden grid grid-cols-2 gap-2.5">
+                        <button id="btn-resign" onclick="confirmAction('resign')" class="game-btn flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-rose-600/90 hover:bg-rose-500 text-white font-bold text-xs border border-rose-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
+                            <span>Menyerah</span>
+                        </button>
+
+                        <button onclick="leaveRoomToLobby()" class="game-btn flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-100 font-bold text-xs border border-slate-600">
+                            <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                            <span>Keluar Room</span>
+                        </button>
+                    </div>
+
+                    <!-- Tombol Kembali ke Lobi untuk Mode Lokal -->
+                    <button id="btn-local-to-lobby" onclick="leaveRoomToLobby()" class="mt-2.5 w-full py-2 px-3 rounded-xl bg-slate-900/70 hover:bg-slate-900 border border-slate-700 text-slate-300 text-xs font-semibold transition">
+                        ← Kembali ke Lobi Utama
+                    </button>
+
+                    <!-- Kotak Konfirmasi Aksi (Menggantikan alert/confirm) -->
+                    <div id="action-confirm-box" class="hidden mt-3 p-3 rounded-xl bg-slate-900/95 border border-rose-500/50 flex items-center justify-between gap-2">
+                        <span id="action-confirm-text" class="text-xs text-slate-200 font-medium">Yakin ingin menyerah?</span>
+                        <div class="flex gap-1.5">
+                            <button id="btn-confirm-yes" class="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold">Ya</button>
+                            <button onclick="cancelConfirm()" class="px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold">Batal</button>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Daftar Langkah -->
-                <div id="move-history-list" class="flex-1 overflow-y-auto custom-scrollbar divide-y divide-slate-700/40 text-xs">
-                    <div class="text-slate-500 text-center py-8 italic">Belum ada langkah dimainkan.</div>
+                <!-- Panel Riwayat Langkah (Move History) -->
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow-lg flex flex-col h-64 lg:h-[340px]">
+                    <div class="flex items-center justify-between mb-2.5">
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Riwayat Langkah</h2>
+                        <span id="move-count-badge" class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-slate-700 text-slate-300">0 Langkah</span>
+                    </div>
+                    
+                    <!-- Header Kolom Tabel -->
+                    <div class="grid grid-cols-12 text-[11px] font-bold text-slate-400 pb-1.5 border-b border-slate-700 px-2">
+                        <div class="col-span-2">#</div>
+                        <div class="col-span-5">Putih</div>
+                        <div class="col-span-5">Hitam</div>
+                    </div>
+
+                    <!-- Daftar Langkah -->
+                    <div id="move-history-list" class="flex-1 overflow-y-auto custom-scrollbar divide-y divide-slate-700/40 text-xs">
+                        <div class="text-slate-500 text-center py-8 italic">Belum ada langkah dimainkan.</div>
+                    </div>
                 </div>
-            </div>
 
-        </aside>
-    </main>
+            </aside>
+        </main>
+    </div>
 
-    <script>
+    <!-- =========================================================================
+         SCRIPT LOGIKA GAME & SINKRONISASI FIREBASE FIRESTORE
+         ========================================================================= -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        /**
+         * ============================================================================
+         * KONFIGURASI FIREBASE
+         * Catatan Self-Hosting: Jika Anda menjalankan file ini di luar lingkungan ini,
+         * ganti objek fallback `defaultFirebaseConfig` di bawah dengan konfigurasi
+         * proyek Firebase Anda sendiri dari Firebase Console.
+         * ============================================================================
+         */
+        const defaultFirebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const firebaseConfig = typeof __firebase_config !== 'undefined'
+            ? JSON.parse(__firebase_config)
+            : defaultFirebaseConfig;
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'catur-online-id';
+
+        let app = null;
+        let auth = null;
+        let db = null;
+        let currentUser = null;
+        let isFirebaseReady = false;
+
+        // Inisialisasi Firebase & Autentikasi Anonim / Custom Token
+        async function initFirebase() {
+            const statusDot = document.getElementById('server-status-dot');
+            const statusText = document.getElementById('server-status-text');
+
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    const cred = await signInWithCustomToken(auth, __initial_auth_token);
+                    currentUser = cred.user;
+                } else {
+                    const cred = await signInAnonymously(auth);
+                    currentUser = cred.user;
+                }
+
+                isFirebaseReady = true;
+                statusDot.className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]';
+                statusText.textContent = 'Server Online Siap Digunakan';
+
+                document.getElementById('btn-create-room').disabled = false;
+                document.getElementById('btn-join-room').disabled = false;
+            } catch (error) {
+                console.error("Gagal terhubung ke Firebase:", error);
+                statusDot.className = 'w-2 h-2 rounded-full bg-rose-500';
+                statusText.textContent = 'Mode Offline (Konfigurasi server belum diatur)';
+            }
+        }
+
         /**
          * ============================================================================
          * ASET SVG BIDAK CATUR BERKUALITAS TINGGI (PUTIH & HITAM)
@@ -354,7 +560,6 @@
             }
         };
 
-        // Nilai material masing-masing bidak untuk perhitungan keunggulan skor
         const PIECE_VALUES = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
         const PIECE_SYMBOLS_UNICODE = {
             w: { p: '♙', r: '♖', n: '♘', b: '♗', q: '♕', k: '♔' },
@@ -363,33 +568,50 @@
 
         /**
          * ============================================================================
-         * VARIABEL STATE PERMAINAN
+         * VARIABEL STATE PERMAINAN & MULTIPLAYER
          * ============================================================================
          */
-        let board = [];               // Matriks 8x8 berisi objek bidak { type, color } atau null
-        let turn = 'w';               // Giliran saat ini: 'w' (Putih) atau 'b' (Hitam)
-        let selectedSquare = null;    // Koordinat kotak terpilih { r, c }
-        let legalMovesForSelected = []; // Daftar langkah valid untuk bidak yang dipilih
-        let castlingRights = {        // Hak rokade
-            w: { k: true, q: true },
-            b: { k: true, q: true }
-        };
-        let enPassantTarget = null;   // Target kotak en passant { r, c } atau null
-        let lastMove = null;          // Langkah terakhir { from: {r, c}, to: {r, c} }
-        let moveHistory = [];         // Riwayat notasi langkah untuk UI
-        let stateSnapshots = [];      // Tumpukan snapshot state lengkap untuk fitur Undo
-        let capturedPieces = { w: [], b: [] }; // Bidak yang dimakan oleh Putih ('w') dan Hitam ('b')
-        let isFlipped = false;        // Orientasi papan (false = Putih di bawah, true = Hitam di bawah)
-        let isGameOver = false;       // Status apakah permainan telah berakhir
-        let pendingPromotion = null;  // Menyimpan data langkah saat menunggu pilihan promosi pion
+        let gameMode = 'local';       // 'local' atau 'online'
+        let myRole = null;            // 'w' (Putih) atau 'b' (Hitam) untuk mode online
+        let currentRoomCode = null;   // Kode room 6 karakter
+        let unsubscribeRoom = null;   // Fungsi pemutus listener onSnapshot Firestore
+        let opponentJoined = false;   // Status apakah pemain hitam sudah masuk ke room
+        let gameResult = null;        // null | 'checkmate' | 'stalemate' | 'resigned'
+        let winnerColor = null;       // 'w' | 'b' | null
+
+        let board = [];
+        let turn = 'w';
+        let selectedSquare = null;
+        let legalMovesForSelected = [];
+        let castlingRights = { w: { k: true, q: true }, b: { k: true, q: true } };
+        let enPassantTarget = null;
+        let lastMove = null;
+        let moveHistory = [];
+        let stateSnapshots = [];
+        let capturedPieces = { w: [], b: [] };
+        let isFlipped = false;
+        let isGameOver = false;
+        let pendingPromotion = null;
+        let confirmActionType = null;
 
         /**
          * ============================================================================
-         * INISIALISASI PERMAINAN
+         * FUNGSI LOBI & MANAJEMEN ROOM ONLINE (FIRESTORE)
          * ============================================================================
          */
-        function initGame() {
-            // Susunan awal papan catur standar
+
+        // Membuat kode room acak 6 karakter yang mudah dibaca (tanpa I, O, 0, 1)
+        function generateRoomCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        // Membuat susunan papan awal standar
+        function createInitialBoard() {
             const initialLayout = [
                 ['br', 'bn', 'bb', 'bq', 'bk', 'bb', 'bn', 'br'],
                 ['bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp'],
@@ -400,48 +622,368 @@
                 ['wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp'],
                 ['wr', 'wn', 'wb', 'wq', 'wk', 'wb', 'wn', 'wr']
             ];
-
-            board = initialLayout.map(row =>
+            return initialLayout.map(row =>
                 row.map(cell => cell ? { color: cell[0], type: cell[1] } : null)
             );
+        }
 
-            turn = 'w';
-            selectedSquare = null;
-            legalMovesForSelected = [];
-            castlingRights = { w: { k: true, q: true }, b: { k: true, q: true } };
-            enPassantTarget = null;
-            lastMove = null;
-            moveHistory = [];
-            stateSnapshots = [];
-            capturedPieces = { w: [], b: [] };
+        // Referensi dokumen room di jalur publik Firestore sesuai aturan wajib
+        function getRoomDocRef(code) {
+            return doc(db, 'artifacts', appId, 'public', 'data', 'chess_rooms', code);
+        }
+
+        // OPSI 1: Buat Room Baru (Pemain Putih)
+        window.createOnlineRoom = async function () {
+            if (!isFirebaseReady || !currentUser) {
+                showToast('Server belum siap, silakan tunggu sebentar.', '⚠️');
+                return;
+            }
+
+            const btn = document.getElementById('btn-create-room');
+            btn.disabled = true;
+            btn.textContent = 'Membuat Room...';
+
+            try {
+                let code = generateRoomCode();
+                let roomRef = getRoomDocRef(code);
+                let snap = await getDoc(roomRef);
+
+                // Pastikan kode room unik
+                while (snap.exists()) {
+                    code = generateRoomCode();
+                    roomRef = getRoomDocRef(code);
+                    snap = await getDoc(roomRef);
+                }
+
+                const initialBoard = createInitialBoard();
+                const roomPayload = {
+                    roomCode: code,
+                    whiteId: currentUser.uid,
+                    blackId: null,
+                    status: 'waiting', // 'waiting' | 'playing' | 'finished'
+                    boardJson: JSON.stringify(initialBoard),
+                    turn: 'w',
+                    castlingRights: { w: { k: true, q: true }, b: { k: true, q: true } },
+                    enPassantTarget: null,
+                    lastMove: null,
+                    moveHistory: [],
+                    capturedPieces: { w: [], b: [] },
+                    gameResult: null,
+                    winner: null,
+                    updatedAt: Date.now()
+                };
+
+                await setDoc(roomRef, roomPayload);
+
+                // Masuk ke arena permainan sebagai Putih
+                gameMode = 'online';
+                myRole = 'w';
+                currentRoomCode = code;
+                isFlipped = false; // Putih selalu di bawah
+
+                enterGameScreen();
+                subscribeToRoom(code);
+                showToast(`Room ${code} berhasil dibuat!`, '✅');
+            } catch (err) {
+                console.error("Error membuat room:", err);
+                showToast('Gagal membuat room online.', '❌');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Buat Room Baru (Main Online - Putih)</span>';
+            }
+        };
+
+        // OPSI 2: Gabung Room (Pemain Hitam)
+        window.joinOnlineRoom = async function () {
+            if (!isFirebaseReady || !currentUser) {
+                showToast('Server belum siap, silakan tunggu sebentar.', '⚠️');
+                return;
+            }
+
+            const inputEl = document.getElementById('input-room-code');
+            const errorEl = document.getElementById('lobby-error-msg');
+            const code = inputEl.value.trim().toUpperCase();
+
+            errorEl.classList.add('hidden');
+
+            if (code.length !== 6) {
+                errorEl.textContent = 'Masukkan 6 karakter kode room yang valid.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            const btn = document.getElementById('btn-join-room');
+            btn.disabled = true;
+            btn.textContent = 'Bergabung...';
+
+            try {
+                const roomRef = getRoomDocRef(code);
+                const snap = await getDoc(roomRef);
+
+                if (!snap.exists()) {
+                    errorEl.textContent = 'Room tidak ditemukan. Periksa kembali kode room Anda.';
+                    errorEl.classList.remove('hidden');
+                    return;
+                }
+
+                const data = snap.data();
+
+                // Izinkan masuk jika slot hitam kosong, atau jika pemain yang sama masuk kembali (reconnect)
+                if (data.blackId && data.blackId !== currentUser.uid) {
+                    if (data.whiteId === currentUser.uid) {
+                        // Reconnect sebagai Putih
+                        myRole = 'w';
+                        isFlipped = false;
+                    } else {
+                        errorEl.textContent = 'Room ini sudah penuh (2 pemain sudah bergabung).';
+                        errorEl.classList.remove('hidden');
+                        return;
+                    }
+                } else {
+                    // Bergabung sebagai Hitam
+                    myRole = 'b';
+                    isFlipped = true; // Papan otomatis diputar dengan Hitam di bawah!
+                    if (!data.blackId) {
+                        await updateDoc(roomRef, {
+                            blackId: currentUser.uid,
+                            status: 'playing',
+                            updatedAt: Date.now()
+                        });
+                    }
+                }
+
+                gameMode = 'online';
+                currentRoomCode = code;
+
+                enterGameScreen();
+                subscribeToRoom(code);
+                showToast(`Berhasil bergabung ke Room ${code}!`, '🎮');
+            } catch (err) {
+                console.error("Error bergabung ke room:", err);
+                errorEl.textContent = 'Terjadi kesalahan saat mencoba bergabung.';
+                errorEl.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Gabung Room (Hitam)';
+            }
+        };
+
+        // Mendengarkan perubahan data room secara real-time via onSnapshot
+        function subscribeToRoom(code) {
+            if (unsubscribeRoom) {
+                unsubscribeRoom();
+                unsubscribeRoom = null;
+            }
+
+            const roomRef = getRoomDocRef(code);
+            unsubscribeRoom = onSnapshot(
+                roomRef,
+                (docSnap) => {
+                    if (!docSnap.exists()) return;
+                    const data = docSnap.data();
+
+                    // Deteksi jika lawan baru saja bergabung
+                    const wasWaiting = !opponentJoined;
+                    opponentJoined = Boolean(data.whiteId && data.blackId);
+
+                    if (wasWaiting && opponentJoined && myRole === 'w') {
+                        showToast('Lawan telah bergabung! Permainan dimulai.', '⚔️');
+                    }
+
+                    // Sinkronisasi seluruh state papan dari Firestore
+                    board = JSON.parse(data.boardJson);
+                    turn = data.turn;
+                    castlingRights = data.castlingRights;
+                    enPassantTarget = data.enPassantTarget || null;
+                    lastMove = data.lastMove || null;
+                    moveHistory = data.moveHistory || [];
+                    capturedPieces = data.capturedPieces || { w: [], b: [] };
+                    gameResult = data.gameResult || null;
+                    winnerColor = data.winner || null;
+                    isGameOver = data.status === 'finished';
+
+                    // Reset pilihan bidak lokal jika giliran berpindah
+                    if (turn !== myRole) {
+                        selectedSquare = null;
+                        legalMovesForSelected = [];
+                    }
+
+                    updateUI();
+
+                    // Tampilkan modal akhir permainan jika pertandingan selesai
+                    if (isGameOver) {
+                        showGameOverModal();
+                    }
+                },
+                (error) => {
+                    console.error("Kesalahan sinkronisasi real-time:", error);
+                    showToast('Koneksi real-time terganggu.', '⚠️');
+                }
+            );
+        }
+
+        // Mengirim pembaruan langkah ke Firestore
+        async function syncMoveToFirestore(nextStatus) {
+            if (gameMode !== 'online' || !currentRoomCode) return;
+
+            try {
+                const roomRef = getRoomDocRef(currentRoomCode);
+                await updateDoc(roomRef, {
+                    boardJson: JSON.stringify(board),
+                    turn: turn,
+                    castlingRights: castlingRights,
+                    enPassantTarget: enPassantTarget,
+                    lastMove: lastMove,
+                    moveHistory: moveHistory,
+                    capturedPieces: capturedPieces,
+                    status: nextStatus,
+                    gameResult: gameResult,
+                    winner: winnerColor,
+                    updatedAt: Date.now()
+                });
+            } catch (err) {
+                console.error("Gagal menyinkronkan langkah:", err);
+                showToast('Gagal mengirim langkah ke server.', '❌');
+            }
+        }
+
+        // Menyerah (Resign) di Mode Online
+        async function resignOnlineGame() {
+            if (gameMode !== 'online' || isGameOver) return;
+
+            isGameOver = true;
+            gameResult = 'resigned';
+            winnerColor = myRole === 'w' ? 'b' : 'w';
+
+            await syncMoveToFirestore('finished');
+            cancelConfirm();
+        }
+
+        // OPSI 3: Main Lokal (2 Pemain 1 Perangkat)
+        window.startLocalGame = function () {
+            if (unsubscribeRoom) {
+                unsubscribeRoom();
+                unsubscribeRoom = null;
+            }
+
+            gameMode = 'local';
+            myRole = null;
+            currentRoomCode = null;
+            opponentJoined = true;
+            isFlipped = false;
+
+            enterGameScreen();
+            resetLocalGame();
+        };
+
+        // Transisi tampilan dari Lobi ke Arena Permainan
+        function enterGameScreen() {
+            document.getElementById('lobby-screen').classList.add('hidden');
+            const gameScreen = document.getElementById('game-screen');
+            gameScreen.classList.remove('hidden');
+            gameScreen.classList.add('flex');
+
+            const modeBadge = document.getElementById('mode-badge');
+            const roleSubtitle = document.getElementById('role-subtitle');
+            const roomCodeBar = document.getElementById('room-code-bar');
+            const localControls = document.getElementById('local-controls');
+            const onlineControls = document.getElementById('online-controls');
+            const btnLocalToLobby = document.getElementById('btn-local-to-lobby');
+            const btnPlayAgainLocal = document.getElementById('btn-play-again-local');
+
+            if (gameMode === 'online') {
+                modeBadge.textContent = 'Online';
+                modeBadge.className = 'text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+                roleSubtitle.textContent = myRole === 'w'
+                    ? 'Anda bermain sebagai Putih (Bawah)'
+                    : 'Anda bermain sebagai Hitam (Bawah)';
+
+                roomCodeBar.classList.remove('hidden');
+                document.getElementById('display-room-code').textContent = currentRoomCode;
+                document.getElementById('overlay-room-code').textContent = currentRoomCode;
+
+                localControls.classList.add('hidden');
+                onlineControls.classList.remove('hidden');
+                btnLocalToLobby.classList.add('hidden');
+                btnPlayAgainLocal.classList.add('hidden');
+            } else {
+                modeBadge.textContent = 'Lokal 2P';
+                modeBadge.className = 'text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-500/40';
+                roleSubtitle.textContent = 'Mode Pass & Play • 1 Perangkat';
+
+                roomCodeBar.classList.add('hidden');
+                localControls.classList.remove('hidden');
+                onlineControls.classList.add('hidden');
+                btnLocalToLobby.classList.remove('hidden');
+                btnPlayAgainLocal.classList.remove('hidden');
+            }
+        }
+
+        // Keluar dari room / arena kembali ke Lobi Utama
+        window.leaveRoomToLobby = function () {
+            if (unsubscribeRoom) {
+                unsubscribeRoom();
+                unsubscribeRoom = null;
+            }
+
+            currentRoomCode = null;
+            myRole = null;
             isGameOver = false;
             pendingPromotion = null;
+            cancelConfirm();
 
-            // Sembunyikan modal
-            document.getElementById('promotion-modal').classList.add('hidden');
             document.getElementById('gameover-modal').classList.add('hidden');
-            document.getElementById('reset-confirm-box').classList.add('hidden');
+            document.getElementById('promotion-modal').classList.add('hidden');
+            document.getElementById('waiting-opponent-overlay').classList.add('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('flex');
+            document.getElementById('lobby-screen').classList.remove('hidden');
+        };
 
-            updateUI();
+        // Menyalin kode room ke clipboard (kompatibel di dalam iframe)
+        window.copyRoomCode = function () {
+            if (!currentRoomCode) return;
+            const tempInput = document.createElement('input');
+            tempInput.value = currentRoomCode;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast(`Kode room "${currentRoomCode}" disalin!`, '📋');
+        };
+
+        // Menampilkan notifikasi toast singkat
+        let toastTimeout = null;
+        function showToast(message, icon = 'ℹ️') {
+            const toast = document.getElementById('toast-notification');
+            document.getElementById('toast-icon').textContent = icon;
+            document.getElementById('toast-message').textContent = message;
+
+            toast.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-[-10px]', 'opacity-0');
+            });
+
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('translate-y-[-10px]', 'opacity-0');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3000);
         }
 
         /**
          * ============================================================================
-         * MESIN VALIDASI LANGKAH CATUR LENGKAP
+         * MESIN VALIDASI LANGKAH CATUR RESMI (FIDE)
          * ============================================================================
          */
-
-        // Memeriksa apakah koordinat berada di dalam papan 8x8
         function isInBounds(r, c) {
             return r >= 0 && r < 8 && c >= 0 && c < 8;
         }
 
-        // Membuat salinan mendalam (deep clone) dari papan
         function cloneBoard(b) {
             return b.map(row => row.map(cell => cell ? { ...cell } : null));
         }
 
-        // Mencari posisi Raja berdasarkan warna
         function findKing(b, color) {
             for (let r = 0; r < 8; r++) {
                 for (let c = 0; c < 8; c++) {
@@ -453,12 +995,8 @@
             return null;
         }
 
-        /**
-         * Memeriksa apakah kotak (targetR, targetC) diserang oleh bidak berwarna `attackerColor`
-         */
         function isSquareAttacked(b, targetR, targetC, attackerColor) {
-            const pawnDir = attackerColor === 'w' ? 1 : -1; // Arah asal pion penyerang
-            // 1. Cek serangan Pion
+            const pawnDir = attackerColor === 'w' ? 1 : -1;
             for (const dc of [-1, 1]) {
                 const pr = targetR + pawnDir;
                 const pc = targetC + dc;
@@ -468,26 +1006,19 @@
                 }
             }
 
-            // 2. Cek serangan Kuda
-            const knightOffsets = [
-                [-2, -1], [-2, 1], [-1, -2], [-1, 2],
-                [1, -2], [1, 2], [2, -1], [2, 1]
-            ];
+            const knightOffsets = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
             for (const [dr, dc] of knightOffsets) {
-                const nr = targetR + dr;
-                const nc = targetC + dc;
+                const nr = targetR + dr, nc = targetC + dc;
                 if (isInBounds(nr, nc)) {
                     const p = b[nr][nc];
                     if (p && p.color === attackerColor && p.type === 'n') return true;
                 }
             }
 
-            // 3. Cek serangan Raja (jarak 1 kotak)
             for (let dr = -1; dr <= 1; dr++) {
                 for (let dc = -1; dc <= 1; dc++) {
                     if (dr === 0 && dc === 0) continue;
-                    const kr = targetR + dr;
-                    const kc = targetC + dc;
+                    const kr = targetR + dr, kc = targetC + dc;
                     if (isInBounds(kr, kc)) {
                         const p = b[kr][kc];
                         if (p && p.color === attackerColor && p.type === 'k') return true;
@@ -495,32 +1026,28 @@
                 }
             }
 
-            // 4. Cek serangan Garis Lurus (Benteng & Ratu)
             const orthoDirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
             for (const [dr, dc] of orthoDirs) {
-                let r = targetR + dr;
-                let c = targetC + dc;
+                let r = targetR + dr, c = targetC + dc;
                 while (isInBounds(r, c)) {
                     const p = b[r][c];
                     if (p) {
                         if (p.color === attackerColor && (p.type === 'r' || p.type === 'q')) return true;
-                        break; // Terhalang bidak lain
+                        break;
                     }
                     r += dr;
                     c += dc;
                 }
             }
 
-            // 5. Cek serangan Diagonal (Gajah & Ratu)
             const diagDirs = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
             for (const [dr, dc] of diagDirs) {
-                let r = targetR + dr;
-                let c = targetC + dc;
+                let r = targetR + dr, c = targetC + dc;
                 while (isInBounds(r, c)) {
                     const p = b[r][c];
                     if (p) {
                         if (p.color === attackerColor && (p.type === 'b' || p.type === 'q')) return true;
-                        break; // Terhalang bidak lain
+                        break;
                     }
                     r += dr;
                     c += dc;
@@ -530,7 +1057,6 @@
             return false;
         }
 
-        // Memeriksa apakah Raja berwarna `color` sedang dalam kondisi Skak (Check)
         function isKingInCheck(b, color) {
             const kingPos = findKing(b, color);
             if (!kingPos) return false;
@@ -538,9 +1064,6 @@
             return isSquareAttacked(b, kingPos.r, kingPos.c, opponentColor);
         }
 
-        /**
-         * Menghasilkan daftar langkah pseudo-legal (belum memfilter skak terhadap raja sendiri)
-         */
         function getPseudoLegalMoves(b, r, c, currentCastling, currentEnPassant) {
             const piece = b[r][c];
             if (!piece) return [];
@@ -554,27 +1077,16 @@
                 const startRow = color === 'w' ? 6 : 1;
                 const promoRow = color === 'w' ? 0 : 7;
 
-                // Maju 1 langkah
                 const r1 = r + dir;
                 if (isInBounds(r1, c) && !b[r1][c]) {
-                    moves.push({
-                        from: { r, c },
-                        to: { r: r1, c },
-                        isPromotion: r1 === promoRow
-                    });
+                    moves.push({ from: { r, c }, to: { r: r1, c }, isPromotion: r1 === promoRow });
 
-                    // Maju 2 langkah dari posisi awal
                     const r2 = r + dir * 2;
                     if (r === startRow && !b[r2][c]) {
-                        moves.push({
-                            from: { r, c },
-                            to: { r: r2, c },
-                            isDoublePawnPush: true
-                        });
+                        moves.push({ from: { r, c }, to: { r: r2, c }, isDoublePawnPush: true });
                     }
                 }
 
-                // Makan diagonal & En Passant
                 for (const dc of [-1, 1]) {
                     const nc = c + dc;
                     if (isInBounds(r1, nc)) {
@@ -629,7 +1141,6 @@
                     }
                 }
             } else if (type === 'k') {
-                // Langkah normal Raja
                 for (let dr = -1; dr <= 1; dr++) {
                     for (let dc = -1; dc <= 1; dc++) {
                         if (dr === 0 && dc === 0) continue;
@@ -646,31 +1157,21 @@
                 // Rokade (Castling)
                 const homeRow = color === 'w' ? 7 : 0;
                 if (r === homeRow && c === 4 && !isKingInCheck(b, color)) {
-                    // Rokade Sisi Raja (King-side / O-O)
                     if (currentCastling[color].k) {
                         if (!b[homeRow][5] && !b[homeRow][6] &&
                             b[homeRow][7] && b[homeRow][7].type === 'r' && b[homeRow][7].color === color) {
                             if (!isSquareAttacked(b, homeRow, 5, opponent) &&
                                 !isSquareAttacked(b, homeRow, 6, opponent)) {
-                                moves.push({
-                                    from: { r, c },
-                                    to: { r: homeRow, c: 6 },
-                                    castling: 'k'
-                                });
+                                moves.push({ from: { r, c }, to: { r: homeRow, c: 6 }, castling: 'k' });
                             }
                         }
                     }
-                    // Rokade Sisi Ratu (Queen-side / O-O-O)
                     if (currentCastling[color].q) {
                         if (!b[homeRow][3] && !b[homeRow][2] && !b[homeRow][1] &&
                             b[homeRow][0] && b[homeRow][0].type === 'r' && b[homeRow][0].color === color) {
                             if (!isSquareAttacked(b, homeRow, 3, opponent) &&
                                 !isSquareAttacked(b, homeRow, 2, opponent)) {
-                                moves.push({
-                                    from: { r, c },
-                                    to: { r: homeRow, c: 2 },
-                                    castling: 'q'
-                                });
+                                moves.push({ from: { r, c }, to: { r: homeRow, c: 2 }, castling: 'q' });
                             }
                         }
                     }
@@ -680,7 +1181,6 @@
             return moves;
         }
 
-        // Mensimulasikan langkah di papan sementara untuk memastikan Raja tidak dalam skak
         function simulateMoveOnBoard(b, move) {
             const tempBoard = cloneBoard(b);
             const piece = tempBoard[move.from.r][move.from.c];
@@ -688,12 +1188,9 @@
             tempBoard[move.to.r][move.to.c] = piece;
             tempBoard[move.from.r][move.from.c] = null;
 
-            // Jika En Passant, hapus pion lawan yang tertangkap
             if (move.isEnPassant) {
                 tempBoard[move.from.r][move.to.c] = null;
             }
-
-            // Jika Rokade, pindahkan Benteng juga
             if (move.castling === 'k') {
                 tempBoard[move.from.r][5] = tempBoard[move.from.r][7];
                 tempBoard[move.from.r][7] = null;
@@ -705,7 +1202,6 @@
             return tempBoard;
         }
 
-        // Mendapatkan semua langkah legal 100% untuk satu bidak
         function getLegalMoves(r, c) {
             const piece = board[r][c];
             if (!piece || piece.color !== turn) return [];
@@ -717,7 +1213,6 @@
             });
         }
 
-        // Memeriksa apakah pemain dengan warna `color` memiliki setidaknya 1 langkah legal
         function hasAnyLegalMoves(color) {
             for (let r = 0; r < 8; r++) {
                 for (let c = 0; c < 8; c++) {
@@ -735,17 +1230,14 @@
 
         /**
          * ============================================================================
-         * EKSEKUSI LANGKAH, PROMOSI PION, NOTASI ALJABAR, & UNDO
+         * EKSEKUSI LANGKAH & PENEGAKAN HAK AKSES PERAN (ROLE ENFORCEMENT)
          * ============================================================================
          */
-
-        // Konversi koordinat (r, c) ke notasi catur standar (misal: e4, a8)
         function toAlgebraicCoord(r, c) {
             const files = 'abcdefgh';
             return `${files[c]}${8 - r}`;
         }
 
-        // Menyimpan snapshot kondisi sebelum langkah dilakukan (untuk Undo)
         function saveSnapshot() {
             stateSnapshots.push({
                 board: cloneBoard(board),
@@ -755,19 +1247,31 @@
                 lastMove: lastMove ? JSON.parse(JSON.stringify(lastMove)) : null,
                 moveHistory: JSON.parse(JSON.stringify(moveHistory)),
                 capturedPieces: JSON.parse(JSON.stringify(capturedPieces)),
-                isGameOver: isGameOver
+                isGameOver: isGameOver,
+                gameResult: gameResult,
+                winnerColor: winnerColor
             });
         }
 
-        // Menangani klik pada kotak papan
         function handleSquareClick(r, c) {
             if (isGameOver || pendingPromotion) return;
+
+            // Penegakan peran di Mode Online:
+            if (gameMode === 'online') {
+                if (!opponentJoined) {
+                    showToast('Tunggu lawan bergabung terlebih dahulu.', '⏳');
+                    return;
+                }
+                if (turn !== myRole) {
+                    showToast('Sekarang giliran lawan Anda.', '⏳');
+                    return;
+                }
+            }
 
             // Cek apakah kotak yang diklik adalah tujuan langkah valid dari bidak terpilih
             const chosenMove = legalMovesForSelected.find(m => m.to.r === r && m.to.c === c);
 
             if (chosenMove) {
-                // Jika langkah promosi pion, tampilkan modal pemilihan bidak dulu
                 if (chosenMove.isPromotion) {
                     pendingPromotion = chosenMove;
                     showPromotionModal(turn);
@@ -777,11 +1281,12 @@
                 return;
             }
 
-            // Jika mengklik bidak milik sendiri, pilih bidak tersebut
+            // Hanya izinkan memilih bidak sesuai giliran (dan peran pada mode online)
             const clickedPiece = board[r][c];
-            if (clickedPiece && clickedPiece.color === turn) {
+            const allowedColor = gameMode === 'online' ? myRole : turn;
+
+            if (clickedPiece && clickedPiece.color === allowedColor && clickedPiece.color === turn) {
                 if (selectedSquare && selectedSquare.r === r && selectedSquare.c === c) {
-                    // Batalkan pilihan jika mengklik kotak yang sama
                     selectedSquare = null;
                     legalMovesForSelected = [];
                 } else {
@@ -790,14 +1295,12 @@
                 }
                 renderBoard();
             } else {
-                // Klik kotak kosong/lawan yang tidak valid -> hapus seleksi
                 selectedSquare = null;
                 legalMovesForSelected = [];
                 renderBoard();
             }
         }
 
-        // Menampilkan modal promosi pion
         function showPromotionModal(color) {
             const modal = document.getElementById('promotion-modal');
             const choicesContainer = document.getElementById('promotion-choices');
@@ -818,37 +1321,33 @@
             modal.classList.remove('hidden');
         }
 
-        // Menyelesaikan langkah setelah pemain memilih bidak promosi
-        function completePromotion(promotedType) {
+        window.completePromotion = function (promotedType) {
             if (!pendingPromotion) return;
             const move = { ...pendingPromotion, promotedTo: promotedType };
             pendingPromotion = null;
             document.getElementById('promotion-modal').classList.add('hidden');
             executeMove(move);
-        }
+        };
 
-        // Menjalankan langkah secara resmi dan memperbarui seluruh state permainan
-        function executeMove(move) {
-            saveSnapshot();
+        async function executeMove(move) {
+            if (gameMode === 'local') {
+                saveSnapshot();
+            }
 
             const movingPiece = board[move.from.r][move.from.c];
             const opponentColor = turn === 'w' ? 'b' : 'w';
             let capturedPiece = board[move.to.r][move.to.c];
 
-            // 1. Tangani penangkapan En Passant
             if (move.isEnPassant) {
                 capturedPiece = board[move.from.r][move.to.c];
                 board[move.from.r][move.to.c] = null;
             }
 
-            // Catat bidak yang dimakan
             if (capturedPiece) {
                 capturedPieces[turn].push(capturedPiece);
-                // Urutkan bidak yang dimakan berdasarkan nilai (Ratu -> Benteng -> Gajah -> Kuda -> Pion)
                 capturedPieces[turn].sort((a, b) => PIECE_VALUES[b.type] - PIECE_VALUES[a.type]);
             }
 
-            // 2. Pindahkan bidak (atau ubah menjadi bidak promosi)
             if (move.isPromotion && move.promotedTo) {
                 board[move.to.r][move.to.c] = { color: turn, type: move.promotedTo };
             } else {
@@ -856,7 +1355,6 @@
             }
             board[move.from.r][move.from.c] = null;
 
-            // 3. Tangani perpindahan Benteng saat Rokade
             if (move.castling === 'k') {
                 board[move.from.r][5] = board[move.from.r][7];
                 board[move.from.r][7] = null;
@@ -865,7 +1363,6 @@
                 board[move.from.r][0] = null;
             }
 
-            // 4. Perbarui Hak Rokade (Castling Rights)
             if (movingPiece.type === 'k') {
                 castlingRights[turn].k = false;
                 castlingRights[turn].q = false;
@@ -874,14 +1371,12 @@
                 if (move.from.c === 0) castlingRights[turn].q = false;
                 if (move.from.c === 7) castlingRights[turn].k = false;
             }
-            // Jika benteng lawan dimakan di sudut awal
             if (capturedPiece && capturedPiece.type === 'r') {
                 const oppHomeRow = opponentColor === 'w' ? 7 : 0;
                 if (move.to.r === oppHomeRow && move.to.c === 0) castlingRights[opponentColor].q = false;
                 if (move.to.r === oppHomeRow && move.to.c === 7) castlingRights[opponentColor].k = false;
             }
 
-            // 5. Perbarui Target En Passant
             if (move.isDoublePawnPush) {
                 enPassantTarget = {
                     r: (move.from.r + move.to.r) / 2,
@@ -891,7 +1386,6 @@
                 enPassantTarget = null;
             }
 
-            // 6. Ganti giliran & evaluasi status Skak / Skakmat / Remis
             const previousTurn = turn;
             turn = opponentColor;
             lastMove = { from: move.from, to: move.to };
@@ -904,12 +1398,19 @@
             let suffix = '';
             if (!hasMoves) {
                 isGameOver = true;
-                suffix = inCheck ? '#' : ' (½-½)';
+                if (inCheck) {
+                    gameResult = 'checkmate';
+                    winnerColor = previousTurn;
+                    suffix = '#';
+                } else {
+                    gameResult = 'stalemate';
+                    winnerColor = null;
+                    suffix = ' (½-½)';
+                }
             } else if (inCheck) {
                 suffix = '+';
             }
 
-            // 7. Buat Notasi Langkah (Aljabar) untuk Riwayat
             const notation = generateMoveNotation(movingPiece, move, !!capturedPiece, suffix);
             if (previousTurn === 'w') {
                 moveHistory.push({ moveNumber: moveHistory.length + 1, white: notation, black: '' });
@@ -917,16 +1418,15 @@
                 moveHistory[moveHistory.length - 1].black = notation;
             }
 
-            // 8. Perbarui Tampilan
             updateUI();
 
-            // Tampilkan modal jika permainan berakhir
-            if (isGameOver) {
-                showGameOverModal(inCheck, previousTurn);
+            if (gameMode === 'online') {
+                await syncMoveToFirestore(isGameOver ? 'finished' : 'playing');
+            } else if (isGameOver) {
+                showGameOverModal();
             }
         }
 
-        // Membuat notasi catur standar yang mudah dibaca (misal: Nf3, exd5, O-O, e8=Q+)
         function generateMoveNotation(piece, move, isCapture, suffix) {
             if (move.castling === 'k') return `O-O${suffix}`;
             if (move.castling === 'q') return `O-O-O${suffix}`;
@@ -937,11 +1437,7 @@
 
             let notation = '';
             if (piece.type === 'p') {
-                if (isCapture) {
-                    notation += `${fromCoord[0]}x${toCoord}`;
-                } else {
-                    notation += toCoord;
-                }
+                notation += isCapture ? `${fromCoord[0]}x${toCoord}` : toCoord;
                 if (move.isPromotion && move.promotedTo) {
                     notation += `=${pieceLetters[move.promotedTo]}`;
                 }
@@ -952,9 +1448,13 @@
             return notation + suffix;
         }
 
-        // Mengembalikan permainan 1 langkah ke belakang (Undo)
-        function undoMove() {
-            if (stateSnapshots.length === 0 || pendingPromotion) return;
+        /**
+         * ============================================================================
+         * KONTROL PERMAINAN (UNDO, FLIP, RESET, MENYERAH)
+         * ============================================================================
+         */
+        window.undoLocalMove = function () {
+            if (gameMode !== 'local' || stateSnapshots.length === 0 || pendingPromotion) return;
 
             const prevState = stateSnapshots.pop();
             board = prevState.board;
@@ -965,49 +1465,102 @@
             moveHistory = prevState.moveHistory;
             capturedPieces = prevState.capturedPieces;
             isGameOver = prevState.isGameOver;
+            gameResult = prevState.gameResult;
+            winnerColor = prevState.winnerColor;
 
             selectedSquare = null;
             legalMovesForSelected = [];
             document.getElementById('gameover-modal').classList.add('hidden');
 
             updateUI();
-        }
+        };
 
-        // Memutar orientasi papan 180 derajat
-        function flipBoard() {
+        window.flipBoard = function () {
             isFlipped = !isFlipped;
             updateUI();
-        }
+        };
 
-        // Konfirmasi dan Reset Game
-        function confirmReset() {
-            if (moveHistory.length === 0) {
-                initGame();
+        window.resetLocalGame = function () {
+            board = createInitialBoard();
+            turn = 'w';
+            selectedSquare = null;
+            legalMovesForSelected = [];
+            castlingRights = { w: { k: true, q: true }, b: { k: true, q: true } };
+            enPassantTarget = null;
+            lastMove = null;
+            moveHistory = [];
+            stateSnapshots = [];
+            capturedPieces = { w: [], b: [] };
+            isGameOver = false;
+            gameResult = null;
+            winnerColor = null;
+            pendingPromotion = null;
+
+            document.getElementById('promotion-modal').classList.add('hidden');
+            document.getElementById('gameover-modal').classList.add('hidden');
+            cancelConfirm();
+
+            updateUI();
+        };
+
+        window.confirmAction = function (type) {
+            if (type === 'reset' && moveHistory.length === 0) {
+                resetLocalGame();
                 return;
             }
-            document.getElementById('reset-confirm-box').classList.remove('hidden');
-        }
+            if (type === 'resign' && isGameOver) return;
 
-        function cancelReset() {
-            document.getElementById('reset-confirm-box').classList.add('hidden');
-        }
+            confirmActionType = type;
+            const box = document.getElementById('action-confirm-box');
+            const text = document.getElementById('action-confirm-text');
+            const yesBtn = document.getElementById('btn-confirm-yes');
 
-        function resetGame() {
-            initGame();
-        }
+            if (type === 'resign') {
+                text.textContent = 'Yakin ingin menyerah pada pertandingan ini?';
+                yesBtn.onclick = resignOnlineGame;
+            } else {
+                text.textContent = 'Mulai ulang permainan lokal?';
+                yesBtn.onclick = resetLocalGame;
+            }
 
-        // Menampilkan Modal Akhir Permainan
-        function showGameOverModal(isCheckmate, winnerColor) {
+            box.classList.remove('hidden');
+        };
+
+        window.cancelConfirm = function () {
+            confirmActionType = null;
+            document.getElementById('action-confirm-box').classList.add('hidden');
+        };
+
+        function showGameOverModal() {
             const modal = document.getElementById('gameover-modal');
             const icon = document.getElementById('gameover-icon');
             const title = document.getElementById('gameover-title');
             const subtitle = document.getElementById('gameover-subtitle');
 
-            if (isCheckmate) {
-                const winnerName = winnerColor === 'w' ? 'Pemain Putih' : 'Pemain Hitam';
-                icon.textContent = '🏆';
-                title.textContent = 'Skakmat!';
-                subtitle.textContent = `${winnerName} memenangkan pertandingan!`;
+            const winnerName = winnerColor === 'w' ? 'Pemain Putih' : 'Pemain Hitam';
+
+            if (gameResult === 'checkmate') {
+                if (gameMode === 'online') {
+                    const isMeWinner = winnerColor === myRole;
+                    icon.textContent = isMeWinner ? '🏆' : '💔';
+                    title.textContent = isMeWinner ? 'Skakmat! Anda Menang!' : 'Skakmat! Anda Kalah';
+                    subtitle.textContent = `${winnerName} memenangkan pertandingan ini.`;
+                } else {
+                    icon.textContent = '🏆';
+                    title.textContent = 'Skakmat!';
+                    subtitle.textContent = `${winnerName} memenangkan pertandingan!`;
+                }
+            } else if (gameResult === 'resigned') {
+                if (gameMode === 'online') {
+                    const isMeWinner = winnerColor === myRole;
+                    icon.textContent = isMeWinner ? '🏳️' : '😔';
+                    title.textContent = isMeWinner ? 'Lawan Menyerah!' : 'Anda Menyerah';
+                    subtitle.textContent = `${winnerName} dinyatakan menang.`;
+                } else {
+                    icon.textContent = '🏳️';
+                    title.textContent = 'Menyerah';
+                    subtitle.textContent = `${winnerName} memenangkan pertandingan.`;
+                }
             } else {
                 icon.textContent = '🤝';
                 title.textContent = 'Permainan Remis (Stalemate)';
@@ -1023,26 +1576,36 @@
          * ============================================================================
          */
         function updateUI() {
+            // Tampilkan/sembunyikan overlay menunggu lawan pada mode online
+            const waitOverlay = document.getElementById('waiting-opponent-overlay');
+            if (gameMode === 'online' && !opponentJoined && !isGameOver) {
+                waitOverlay.classList.remove('hidden');
+            } else {
+                waitOverlay.classList.add('hidden');
+            }
+
             renderBoard();
             renderStatusBanner();
             renderPlayerBars();
             renderMoveHistory();
-            document.getElementById('btn-undo').disabled = stateSnapshots.length === 0;
+
+            if (gameMode === 'local') {
+                document.getElementById('btn-undo').disabled = stateSnapshots.length === 0;
+            } else {
+                document.getElementById('btn-resign').disabled = isGameOver || !opponentJoined;
+            }
         }
 
-        // Merender Papan 8x8 beserta bidak, sorotan, dan koordinat
         function renderBoard() {
             const boardEl = document.getElementById('chess-board');
             boardEl.innerHTML = '';
 
             const inCheck = isKingInCheck(board, turn);
             const kingPos = inCheck ? findKing(board, turn) : null;
-
             const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
             for (let rowIdx = 0; rowIdx < 8; rowIdx++) {
                 for (let colIdx = 0; colIdx < 8; colIdx++) {
-                    // Sesuaikan indeks baris & kolom jika papan diputar (Flip)
                     const r = isFlipped ? 7 - rowIdx : rowIdx;
                     const c = isFlipped ? 7 - colIdx : colIdx;
 
@@ -1050,23 +1613,19 @@
                     const isLight = (r + c) % 2 === 0;
                     square.className = `square ${isLight ? 'light' : 'dark'}`;
 
-                    // Sorotan kotak terpilih
                     if (selectedSquare && selectedSquare.r === r && selectedSquare.c === c) {
                         square.classList.add('selected');
                     }
 
-                    // Sorotan langkah terakhir
                     if (lastMove && ((lastMove.from.r === r && lastMove.from.c === c) ||
                                      (lastMove.to.r === r && lastMove.to.c === c))) {
                         square.classList.add('last-move');
                     }
 
-                    // Sorotan Raja yang terkena Skak
                     if (kingPos && kingPos.r === r && kingPos.c === c) {
                         square.classList.add('in-check');
                     }
 
-                    // Label Koordinat Baris (1-8) di kolom paling kiri
                     if (colIdx === 0) {
                         const rankLabel = document.createElement('span');
                         rankLabel.className = 'coord-rank';
@@ -1074,7 +1633,6 @@
                         square.appendChild(rankLabel);
                     }
 
-                    // Label Koordinat Kolom (a-h) di baris paling bawah
                     if (rowIdx === 7) {
                         const fileLabel = document.createElement('span');
                         fileLabel.className = 'coord-file';
@@ -1082,7 +1640,6 @@
                         square.appendChild(fileLabel);
                     }
 
-                    // Render Bidak Catur jika ada
                     const piece = board[r][c];
                     if (piece) {
                         const pieceWrapper = document.createElement('div');
@@ -1091,7 +1648,6 @@
                         square.appendChild(pieceWrapper);
                     }
 
-                    // Render Indikator Langkah Valid (titik atau cincin tangkap)
                     const validMove = legalMovesForSelected.find(m => m.to.r === r && m.to.c === c);
                     if (validMove) {
                         const indicator = document.createElement('div');
@@ -1109,22 +1665,31 @@
             }
         }
 
-        // Memperbarui Banner Status Giliran / Skak / Skakmat
         function renderStatusBanner() {
             const banner = document.getElementById('status-banner');
             const dot = document.getElementById('turn-indicator-dot');
             const text = document.getElementById('status-text');
 
-            const inCheck = isKingInCheck(board, turn);
-            const hasMoves = hasAnyLegalMoves(turn);
-            const playerName = turn === 'w' ? 'Putih' : 'Hitam';
+            if (gameMode === 'online' && !opponentJoined && !isGameOver) {
+                banner.className = 'px-4 py-2 rounded-xl bg-amber-950/90 border border-amber-500/70 flex items-center gap-3 shadow-md';
+                dot.className = 'w-3.5 h-3.5 rounded-full bg-amber-400 animate-ping';
+                text.textContent = 'Menunggu lawan bergabung...';
+                text.className = 'text-sm sm:text-base font-bold text-amber-300';
+                return;
+            }
 
-            if (!hasMoves) {
-                if (inCheck) {
-                    const winner = turn === 'w' ? 'Hitam' : 'Putih';
+            if (isGameOver) {
+                if (gameResult === 'checkmate') {
+                    const winner = winnerColor === 'w' ? 'Putih' : 'Hitam';
                     banner.className = 'px-4 py-2 rounded-xl bg-rose-950/90 border border-rose-500 flex items-center gap-3 shadow-lg';
-                    dot.className = 'w-3.5 h-3.5 rounded-full bg-rose-500 animate-ping';
+                    dot.className = 'w-3.5 h-3.5 rounded-full bg-rose-500';
                     text.textContent = `SKAKMAT! ${winner} Menang`;
+                    text.className = 'text-sm sm:text-base font-extrabold text-rose-300';
+                } else if (gameResult === 'resigned') {
+                    const winner = winnerColor === 'w' ? 'Putih' : 'Hitam';
+                    banner.className = 'px-4 py-2 rounded-xl bg-rose-950/90 border border-rose-500 flex items-center gap-3 shadow-lg';
+                    dot.className = 'w-3.5 h-3.5 rounded-full bg-rose-500';
+                    text.textContent = `MENYERAH • ${winner} Menang`;
                     text.className = 'text-sm sm:text-base font-extrabold text-rose-300';
                 } else {
                     banner.className = 'px-4 py-2 rounded-xl bg-amber-950/90 border border-amber-500 flex items-center gap-3 shadow-lg';
@@ -1135,29 +1700,48 @@
                 return;
             }
 
-            if (inCheck) {
-                banner.className = 'px-4 py-2 rounded-xl bg-rose-950/90 border border-rose-500 flex items-center gap-3 shadow-lg';
-                dot.className = 'w-3.5 h-3.5 rounded-full bg-rose-500 animate-pulse';
-                text.textContent = `SKAK! Giliran ${playerName}`;
-                text.className = 'text-sm sm:text-base font-extrabold text-rose-300';
-            } else {
-                banner.className = 'px-4 py-2 rounded-xl bg-slate-800/90 border border-slate-700 flex items-center gap-3 shadow-md';
-                if (turn === 'w') {
-                    dot.className = 'w-3.5 h-3.5 rounded-full bg-white shadow-[0_0_8px_#fff]';
+            const inCheck = isKingInCheck(board, turn);
+
+            if (gameMode === 'online') {
+                const isMyTurn = turn === myRole;
+                if (inCheck) {
+                    banner.className = 'px-4 py-2 rounded-xl bg-rose-950/90 border border-rose-500 flex items-center gap-3 shadow-lg';
+                    dot.className = 'w-3.5 h-3.5 rounded-full bg-rose-500 animate-pulse';
+                    text.textContent = isMyTurn ? 'SKAK! Giliran Anda' : 'SKAK! Menunggu lawan...';
+                    text.className = 'text-sm sm:text-base font-extrabold text-rose-300';
+                } else if (isMyTurn) {
+                    banner.className = 'px-4 py-2 rounded-xl bg-emerald-950/90 border border-emerald-500 flex items-center gap-3 shadow-md';
+                    dot.className = 'w-3.5 h-3.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]';
+                    text.textContent = 'Giliran Anda';
+                    text.className = 'text-sm sm:text-base font-extrabold text-emerald-300';
                 } else {
-                    dot.className = 'w-3.5 h-3.5 rounded-full bg-slate-900 border-2 border-slate-400';
+                    banner.className = 'px-4 py-2 rounded-xl bg-slate-800/90 border border-slate-700 flex items-center gap-3 shadow-md';
+                    dot.className = 'w-3.5 h-3.5 rounded-full bg-slate-500 animate-pulse';
+                    text.textContent = 'Menunggu langkah lawan...';
+                    text.className = 'text-sm sm:text-base font-bold text-slate-300';
                 }
-                text.textContent = `Giliran: ${playerName}`;
-                text.className = 'text-sm sm:text-base font-bold text-slate-100';
+            } else {
+                const playerName = turn === 'w' ? 'Putih' : 'Hitam';
+                if (inCheck) {
+                    banner.className = 'px-4 py-2 rounded-xl bg-rose-950/90 border border-rose-500 flex items-center gap-3 shadow-lg';
+                    dot.className = 'w-3.5 h-3.5 rounded-full bg-rose-500 animate-pulse';
+                    text.textContent = `SKAK! Giliran ${playerName}`;
+                    text.className = 'text-sm sm:text-base font-extrabold text-rose-300';
+                } else {
+                    banner.className = 'px-4 py-2 rounded-xl bg-slate-800/90 border border-slate-700 flex items-center gap-3 shadow-md';
+                    dot.className = turn === 'w'
+                        ? 'w-3.5 h-3.5 rounded-full bg-white shadow-[0_0_8px_#fff]'
+                        : 'w-3.5 h-3.5 rounded-full bg-slate-900 border-2 border-slate-400';
+                    text.textContent = `Giliran: ${playerName}`;
+                    text.className = 'text-sm sm:text-base font-bold text-slate-100';
+                }
             }
         }
 
-        // Memperbarui Info Pemain Atas & Bawah, Bidak Ter tangkap, dan Selisih Skor Material
         function renderPlayerBars() {
             const topColor = isFlipped ? 'w' : 'b';
             const bottomColor = isFlipped ? 'b' : 'w';
 
-            // Hitung skor material masing-masing
             const whiteScore = capturedPieces.w.reduce((sum, p) => sum + PIECE_VALUES[p.type], 0);
             const blackScore = capturedPieces.b.reduce((sum, p) => sum + PIECE_VALUES[p.type], 0);
             const diff = whiteScore - blackScore;
@@ -1169,29 +1753,31 @@
                 const list = document.getElementById(`${prefix}-captured-list`);
                 const adv = document.getElementById(`${prefix}-material-advantage`);
 
+                let roleTag = '';
+                if (gameMode === 'online') {
+                    roleTag = color === myRole ? ' (Anda)' : (opponentJoined ? ' (Lawan)' : ' (Menunggu...)');
+                }
+
                 if (color === 'w') {
                     avatar.className = 'w-8 h-8 rounded-lg bg-slate-100 text-slate-900 border border-slate-300 flex items-center justify-center text-lg shadow-inner';
                     avatar.textContent = '♔';
-                    name.textContent = 'Pemain Putih';
+                    name.textContent = `Pemain Putih${roleTag}`;
                 } else {
                     avatar.className = 'w-8 h-8 rounded-lg bg-slate-900 text-slate-100 border border-slate-600 flex items-center justify-center text-lg shadow-inner';
                     avatar.textContent = '♚';
-                    name.textContent = 'Pemain Hitam';
+                    name.textContent = `Pemain Hitam${roleTag}`;
                 }
 
-                // Tampilkan lencana giliran aktif
-                if (turn === color && !isGameOver) {
+                if (turn === color && !isGameOver && (gameMode === 'local' || opponentJoined)) {
                     badge.classList.remove('hidden');
                 } else {
                     badge.classList.add('hidden');
                 }
 
-                // Render bidak lawan yang dimakan oleh pemain ini
-                list.innerHTML = capturedPieces[color].map(p =>
+                list.innerHTML = (capturedPieces[color] || []).map(p =>
                     `<span class="text-base leading-none ${p.color === 'w' ? 'text-slate-100 drop-shadow' : 'text-slate-400'}">${PIECE_SYMBOLS_UNICODE[p.color][p.type]}</span>`
                 ).join('');
 
-                // Tampilkan keunggulan poin material (+3, +5, dll.)
                 if (color === 'w' && diff > 0) {
                     adv.textContent = `+${diff}`;
                 } else if (color === 'b' && diff < 0) {
@@ -1205,7 +1791,6 @@
             updateBar('bottom', bottomColor);
         }
 
-        // Memperbarui Tabel Riwayat Langkah
         function renderMoveHistory() {
             const container = document.getElementById('move-history-list');
             const badge = document.getElementById('move-count-badge');
@@ -1229,12 +1814,20 @@
                 `;
             }).join('');
 
-            // Gulir otomatis ke langkah terbaru
             container.scrollTop = container.scrollHeight;
         }
 
-        // Mulai permainan saat halaman selesai dimuat
-        window.onload = initGame;
+        // Jalankan inisialisasi server saat halaman dimuat
+        window.addEventListener('DOMContentLoaded', () => {
+            initFirebase();
+
+            // Izinkan menekan tombol Enter pada kolom input Kode Room
+            document.getElementById('input-room-code').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    window.joinOnlineRoom();
+                }
+            });
+        });
     </script>
 </body>
 </html>
