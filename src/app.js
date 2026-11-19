@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 // Session Management
 app.set('trust proxy', 1);
 app.use(session({
-  secret: process.env.SESSION_SESSION_SECRET || process.env.SESSION_SECRET || 'rahasia_sekolah_123',
+  secret: process.env.SESSION_SECRET || process.env.SESSION_SESSION_SECRET || 'rahasia_sekolah_123',
   resave: false,
   saveUninitialized: false,
   proxy: true, // PENTING: Agar Railway membaca protokol HTTPS dari proxy

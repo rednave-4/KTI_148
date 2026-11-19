@@ -6,33 +6,53 @@ if (currentTheme === 'dark') {
 
 document.addEventListener('DOMContentLoaded', () => {
   fetchLatestAnnouncements();
-  injectAdminNavLink();
+  updateAuthNav();
   setupThemeToggle();
 });
 
-async function injectAdminNavLink() {
+/**
+ * Cek sesi admin, lalu:
+ * - jika login  → hapus/sembunyikan "Login", tampilkan "Dashboard"
+ * - jika belum  → pastikan "Login" ada, "Dashboard" tidak ada
+ */
+async function updateAuthNav() {
+  const nav = document.querySelector('.nav-links');
+  if (!nav) return;
+
   try {
-    const res = await fetch('/api/admin/auth/me');
+    const res = await fetch('/api/admin/auth/me', {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Accept': 'application/json' }
+    });
     if (!res.ok) return;
 
     const data = await res.json();
-    if (!data.loggedIn) return;
 
-    const nav = document.querySelector('.nav-links');
-    if (!nav) return;
+    const loginLi = Array.from(nav.querySelectorAll('li')).find((li) => {
+      const a = li.querySelector('a');
+      return a && /login\.html/i.test(a.getAttribute('href') || '');
+    });
 
-    // Hindari duplikat jika link Dashboard sudah ada
-    if (document.getElementById('admin-dashboard-link')) return;
+    const oldDash = document.getElementById('admin-dashboard-link');
+    if (oldDash) oldDash.remove();
 
-    const existingDashboardLink = nav.querySelector('a[href="/admin/dashboard.html"]');
-    if (existingDashboardLink) return;
+    if (data && data.loggedIn) {
+      if (loginLi) loginLi.remove();
 
-    const li = document.createElement('li');
-    li.id = 'admin-dashboard-link';
-    li.innerHTML = `<a href="/admin/dashboard.html" style="font-weight: 600;">Dashboard</a>`;
-    nav.appendChild(li);
+      const li = document.createElement('li');
+      li.id = 'admin-dashboard-link';
+      li.innerHTML = `<a href="/admin/dashboard.html" style="font-weight: 600;">Dashboard</a>`;
+      nav.appendChild(li);
+    } else {
+      if (!loginLi) {
+        const li = document.createElement('li');
+        li.innerHTML = `<a href="/admin/login.html">Login</a>`;
+        nav.appendChild(li);
+      }
+    }
   } catch (err) {
-    // Diam saja jika gagal mengecek status login
+    console.warn('Gagal cek status login:', err);
   }
 }
 
