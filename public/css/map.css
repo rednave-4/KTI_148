@@ -155,23 +155,17 @@
   user-select: none;
 }
 
-/* Area yang bisa diklik */
 .map-location {
   cursor: pointer;
-  transition: stroke 0.2s ease, stroke-width 0.2s ease, filter 0.2s ease;
 }
 
-.map-location:hover {
-  stroke: #2563eb !important;
-  stroke-width: 2.5px !important;
-  filter: drop-shadow(0 0 4px rgba(37, 99, 235, 0.45));
-}
-
-/* Highlight aktif: JANGAN ubah fill */
+/* Jangan ubah fill/stroke gedung */
 .map-location.active {
-  stroke: #f59e0b !important;
-  stroke-width: 4px !important;
-  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.85));
+  /* kosong / hanya penanda class */
+}
+
+.map-location-highlight {
+  pointer-events: none;
 }
 
 /* Panel Informasi Lokasi */

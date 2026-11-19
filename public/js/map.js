@@ -147,6 +147,9 @@ async function loadSvgMap(svgPath) {
 
     const svgContent = await response.text();
     container.innerHTML = svgContent;
+    // setelah: container.innerHTML = svgContent;
+    currentActiveElement = null;
+    document.querySelectorAll('.map-location-highlight').forEach((n) => n.remove());
     resetMapTransform();
     currentActiveElement = null;
     await bindSvgElements();
@@ -224,46 +227,44 @@ async function bindSvgElements() {
 }
 
 function highlightSvgElement(el) {
-  // Lepas highlight lama
+  // Hapus highlight lama (kotak kuning)
+  document.querySelectorAll('.map-location-highlight').forEach((n) => n.remove());
+
   if (currentActiveElement) {
     currentActiveElement.classList.remove('active');
-    currentActiveElement.style.removeProperty('fill');
-    currentActiveElement.style.removeProperty('fill-opacity');
-    currentActiveElement.style.removeProperty('stroke');
-    currentActiveElement.style.removeProperty('stroke-width');
-    currentActiveElement.style.removeProperty('filter');
-
-    const shapeSelector = 'path, rect, polygon, circle, ellipse';
-    currentActiveElement.querySelectorAll(shapeSelector).forEach((node) => {
-      node.style.removeProperty('fill');
-      node.style.removeProperty('fill-opacity');
-      node.style.removeProperty('stroke');
-      node.style.removeProperty('stroke-width');
-      node.style.removeProperty('filter');
-    });
   }
 
-  if (!el) {
-    currentActiveElement = null;
-    return;
-  }
+  currentActiveElement = el || null;
+  if (!el) return;
 
   el.classList.add('active');
-  currentActiveElement = el;
-  el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-}
 
-function renderLocationPhoto(photoUrl) {
-  const photoWrap = document.getElementById('info-photo-wrap');
-  const photoEl = document.getElementById('info-photo');
-  if (!photoWrap || !photoEl) return;
+  try {
+    const svg = el.ownerSVGElement;
+    if (!svg) return;
 
-  if (photoUrl) {
-    photoEl.src = photoUrl;
-    photoWrap.style.display = 'block';
-  } else {
-    photoEl.removeAttribute('src');
-    photoWrap.style.display = 'none';
+    const bbox = el.getBBox();
+    const ns = 'http://www.w3.org/2000/svg';
+    const rect = document.createElementNS(ns, 'rect');
+
+    rect.setAttribute('class', 'map-location-highlight');
+    rect.setAttribute('x', bbox.x - 6);
+    rect.setAttribute('y', bbox.y - 6);
+    rect.setAttribute('width', bbox.width + 12);
+    rect.setAttribute('height', bbox.height + 12);
+    rect.setAttribute('fill', 'none');
+    rect.setAttribute('stroke', '#f59e0b');
+    rect.setAttribute('stroke-width', '5');
+    rect.setAttribute('rx', '6');
+    rect.setAttribute('ry', '6');
+    rect.setAttribute('pointer-events', 'none');
+    rect.style.filter = 'drop-shadow(0 0 10px rgba(245, 158, 11, 0.9))';
+
+    svg.appendChild(rect);
+
+    el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+  } catch (err) {
+    console.warn('Gagal membuat highlight:', err);
   }
 }
 
