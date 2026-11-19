@@ -221,7 +221,23 @@
   </button>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
+      // ======================
+      // Cek Session Aktif
+      // ======================
+      try {
+        const meRes = await fetch('/api/admin/auth/me');
+        if (meRes.ok) {
+          const meData = await meRes.json();
+          if (meData.loggedIn) {
+            window.location.href = '/admin/dashboard.html';
+            return;
+          }
+        }
+      } catch (e) {
+        // Abaikan jika gagal mengecek session, lanjut ke form login
+      }
+
       // ======================
       // Theme Toggle (1 ikon)
       // ======================
