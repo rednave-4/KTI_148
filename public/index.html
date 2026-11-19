@@ -18,20 +18,31 @@
     </ul>
   </nav>
 
-    <!-- Hero Section -->
-  <header class="hero" style="background: linear-gradient(rgba(11, 61, 145, 0.88), rgba(26, 86, 176, 0.88)), url('/assets/images/hero-bg.jpeg') center/cover; color: white; padding: 5rem 2rem; text-align: center;">
-    <div style="max-width: 800px; margin: auto;">
-      <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.5px;">
-        Sistem Informasi & Denah Interaktif SMARIDASA
-      </h1>
-      <p style="font-size: 1.1rem; margin-bottom: 2rem; opacity: 0.92;">
-        Pusat informasi kegiatan sekolah terkini dan navigasi denah lingkungan sekolah berbasis SVG.
-      </p>
-      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-        <a href="/announcements.html" class="btn">Lihat Pengumuman</a>
-        <a href="/map.html" class="btn btn-secondary" style="background: white; color: var(--primary);">Buka Denah Sekolah</a>
+  <!-- Hero Slider -->
+  <header class="hero-slider" id="hero-slider">
+    <div class="hero-slides">
+      <div class="hero-slide active" style="background-image: url('/assets/images/hero-1.jpg')"></div>
+      <div class="hero-slide" style="background-image: url('/assets/images/hero-2.jpg')"></div>
+      <div class="hero-slide" style="background-image: url('/assets/images/hero-3.jpg')"></div>
+      <div class="hero-slide" style="background-image: url('/assets/images/hero-4.jpg')"></div>
+      <div class="hero-slide" style="background-image: url('/assets/images/hero-5.jpg')"></div>
+    </div>
+
+    <div class="hero-overlay">
+      <div class="hero-content">
+        <h1>Sistem Informasi & Denah Interaktif SMARIDASA</h1>
+        <p>Pusat informasi kegiatan sekolah terkini dan navigasi denah lingkungan sekolah berbasis SVG.</p>
+        <div class="hero-actions">
+          <a href="/announcements.html" class="btn">Lihat Pengumuman</a>
+          <a href="/map.html" class="btn btn-secondary hero-btn-secondary">Buka Denah Sekolah</a>
+        </div>
       </div>
     </div>
+
+    <button type="button" class="hero-nav hero-prev" id="hero-prev" aria-label="Sebelumnya">&#10094;</button>
+    <button type="button" class="hero-nav hero-next" id="hero-next" aria-label="Berikutnya">&#10095;</button>
+
+    <div class="hero-dots" id="hero-dots"></div>
   </header>
 
   <!-- Main Content -->
@@ -52,12 +63,57 @@
   <!-- Pastikan file main.js diletakkan SEBELUM skrip toggle tema -->
   <script src="/js/main.js"></script>
 
+  <script>
+  (function () {
+    const slides = document.querySelectorAll('.hero-slide');
+    const dotsWrap = document.getElementById('hero-dots');
+    const prevBtn = document.getElementById('hero-prev');
+    const nextBtn = document.getElementById('hero-next');
+    if (!slides.length || !dotsWrap) return;
+
+    let index = 0;
+    let timer = null;
+
+    slides.forEach((_, i) => {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.className = 'hero-dot' + (i === 0 ? ' active' : '');
+      dot.setAttribute('aria-label', 'Slide ' + (i + 1));
+      dot.addEventListener('click', () => goTo(i));
+      dotsWrap.appendChild(dot);
+    });
+
+    const dots = dotsWrap.querySelectorAll('.hero-dot');
+
+    function goTo(i) {
+      slides[index].classList.remove('active');
+      if (dots[index]) dots[index].classList.remove('active');
+      index = (i + slides.length) % slides.length;
+      slides[index].classList.add('active');
+      if (dots[index]) dots[index].classList.add('active');
+      restart();
+    }
+
+    function next() { goTo(index + 1); }
+    function prev() { goTo(index - 1); }
+
+    function restart() {
+      clearInterval(timer);
+      timer = setInterval(next, 5000);
+    }
+
+    if (prevBtn) prevBtn.addEventListener('click', prev);
+    if (nextBtn) nextBtn.addEventListener('click', next);
+    restart();
+  })();
+  </script>
+
   <!-- Tombol Toggle Tema Melayang di Pojok Kanan Bawah -->
-  <button id="theme-toggle" class="floating-theme-btn" 
-    style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; 
-          width: 48px; height: 48px; border-radius: 50%; 
-          background-color: #1e293b; color: #f8fafc; 
-          border: none; cursor: pointer; 
+  <button id="theme-toggle" class="floating-theme-btn"
+    style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+          width: 48px; height: 48px; border-radius: 50%;
+          background-color: #1e293b; color: #f8fafc;
+          border: none; cursor: pointer;
           box-shadow: 0 4px 6px rgba(0,0,0,0.2);
           font-size: 1.25rem; display: flex; align-items: center; justify-content: center;
           transition: transform 0.2s, background-color 0.2s;">
