@@ -155,33 +155,23 @@
   user-select: none;
 }
 
-/* Highlight: isi (fill) + tepi (stroke) untuk grup maupun bentuk SVG */
+/* Area yang bisa diklik */
 .map-location {
   cursor: pointer;
-  transition: fill 0.2s ease, stroke 0.2s ease, filter 0.2s ease;
+  transition: stroke 0.2s ease, stroke-width 0.2s ease, filter 0.2s ease;
 }
 
-.map-location:hover,
-.map-location:hover path,
-.map-location:hover rect,
-.map-location:hover polygon,
-.map-location:hover circle,
-.map-location:hover ellipse {
-  stroke: var(--primary) !important;
+.map-location:hover {
+  stroke: #2563eb !important;
   stroke-width: 2.5px !important;
+  filter: drop-shadow(0 0 4px rgba(37, 99, 235, 0.45));
 }
 
-.map-location.active,
-.map-location.active path,
-.map-location.active rect,
-.map-location.active polygon,
-.map-location.active circle,
-.map-location.active ellipse {
-  fill: rgba(255, 51, 51, 0.45) !important;
-  fill-opacity: 0.85 !important;
-  stroke: #ff3333 !important;
-  stroke-width: 3px !important;
-  filter: brightness(1.08);
+/* Highlight aktif: JANGAN ubah fill */
+.map-location.active {
+  stroke: #f59e0b !important;
+  stroke-width: 4px !important;
+  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.85));
 }
 
 /* Panel Informasi Lokasi */

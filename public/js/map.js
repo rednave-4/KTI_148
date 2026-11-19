@@ -223,45 +223,34 @@ async function bindSvgElements() {
   }
 }
 
-function clearElementHighlightStyles(el) {
-  if (!el) return;
-  el.classList.remove('active');
-  const shapeSelector = 'path, rect, polygon, circle, ellipse';
-  el.querySelectorAll(shapeSelector).forEach((node) => {
-    node.style.removeProperty('fill');
-    node.style.removeProperty('stroke');
-    node.style.removeProperty('stroke-width');
-  });
-  if (el.matches && el.matches(shapeSelector)) {
-    el.style.removeProperty('fill');
-    el.style.removeProperty('stroke');
-    el.style.removeProperty('stroke-width');
-  }
-}
-
 function highlightSvgElement(el) {
+  // Lepas highlight lama
   if (currentActiveElement) {
-    clearElementHighlightStyles(currentActiveElement);
-    currentActiveElement = null;
-  }
-
-  if (el) {
-    el.classList.add('active');
-    currentActiveElement = el;
+    currentActiveElement.classList.remove('active');
+    currentActiveElement.style.removeProperty('fill');
+    currentActiveElement.style.removeProperty('fill-opacity');
+    currentActiveElement.style.removeProperty('stroke');
+    currentActiveElement.style.removeProperty('stroke-width');
+    currentActiveElement.style.removeProperty('filter');
 
     const shapeSelector = 'path, rect, polygon, circle, ellipse';
-    el.querySelectorAll(shapeSelector).forEach((node) => {
-      node.style.setProperty('fill', 'rgba(255, 51, 51, 0.5)', 'important');
-      node.style.setProperty('stroke', '#ff3333', 'important');
-      node.style.setProperty('stroke-width', '2.5', 'important');
+    currentActiveElement.querySelectorAll(shapeSelector).forEach((node) => {
+      node.style.removeProperty('fill');
+      node.style.removeProperty('fill-opacity');
+      node.style.removeProperty('stroke');
+      node.style.removeProperty('stroke-width');
+      node.style.removeProperty('filter');
     });
-
-    if (el.matches && el.matches(shapeSelector)) {
-      el.style.setProperty('fill', 'rgba(255, 51, 51, 0.5)', 'important');
-      el.style.setProperty('stroke', '#ff3333', 'important');
-      el.style.setProperty('stroke-width', '2.5', 'important');
-    }
   }
+
+  if (!el) {
+    currentActiveElement = null;
+    return;
+  }
+
+  el.classList.add('active');
+  currentActiveElement = el;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
 }
 
 function renderLocationPhoto(photoUrl) {
