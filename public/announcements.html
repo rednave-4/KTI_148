@@ -72,9 +72,9 @@
     html.dark .search-box input,
     html.dark .filter-select,
     html.dark .sort-select {
-      background: #0f172a;
-      border-color: #334155;
-      color: #e2e8f0;
+      background: var(--bg);
+      border-color: var(--border);
+      color: var(--text);
     }
     html.dark .cat-umum { background: #312e81; color: #c7d2fe; }
     html.dark .cat-osis { background: #14532d; color: #bbf7d0; }
@@ -98,7 +98,7 @@
   <main class="container">
     <h1 style="margin-bottom: 0.5rem; color: var(--primary);">Semua Pengumuman Kegiatan Sekolah</h1>
     <p style="color: var(--text-light); margin-bottom: 1.5rem;">Menampilkan seluruh kegiatan dan informasi resmi SMARIDASA.</p>
-    
+
     <div class="filters-bar">
       <div class="search-filter-group">
         <div class="search-box">
@@ -130,17 +130,40 @@
     </div>
   </main>
 
+  <!-- Modal ringkas pengumuman -->
+  <div id="ann-modal" class="ann-modal" hidden>
+    <div class="ann-modal-backdrop" data-close-modal></div>
+    <div class="ann-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="ann-modal-title">
+      <div class="ann-modal-header">
+        <div>
+          <span id="ann-modal-badge" class="ann-modal-badge"></span>
+          <h2 id="ann-modal-title"></h2>
+        </div>
+        <button type="button" class="ann-modal-close" data-close-modal aria-label="Tutup">&times;</button>
+      </div>
+      <div class="ann-modal-body">
+        <p id="ann-modal-meta" class="ann-modal-meta"></p>
+        <p id="ann-modal-desc"></p>
+        <p id="ann-modal-denah" class="ann-modal-denah"></p>
+      </div>
+      <div class="ann-modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal>Tutup</button>
+        <a id="ann-modal-detail" href="#" class="btn">Baca Selengkapnya</a>
+      </div>
+    </div>
+  </div>
+
   <footer>
     <p>&copy; TIM KTI - 148: Jonathan Doxan P. ; Raphael Evander L.R. ; Zacky Ayyatullah</p>
   </footer>
 
   <script src="/js/announcements.js"></script>
 
-  <button id="theme-toggle" class="floating-theme-btn" 
-    style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; 
-          width: 48px; height: 48px; border-radius: 50%; 
-          background-color: #1e293b; color: #f8fafc; 
-          border: none; cursor: pointer; 
+  <button id="theme-toggle" class="floating-theme-btn"
+    style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+          width: 48px; height: 48px; border-radius: 50%;
+          background-color: #1e293b; color: #f8fafc;
+          border: none; cursor: pointer;
           box-shadow: 0 4px 6px rgba(0,0,0,0.2);
           font-size: 1.25rem; display: flex; align-items: center; justify-content: center;
           transition: transform 0.2s, background-color 0.2s;">
