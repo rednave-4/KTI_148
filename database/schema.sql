@@ -3,7 +3,7 @@
 -- Database Schema - SMA Negeri 10 Samarinda
 -- =====================================================
 
--- (Catatan: Baris CREATE DATABASE & USE dihapus agar langsung mengeksekusi 
+-- (Catatan: Baris CREATE DATABASE & USE dihapus agar langsung mengeksekusi
 --  tabel ke database aktif yang disediakan oleh Railway)
 
 -- =====================================================
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS admins (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Gunakan REPLACE INTO agar jika username 'admin' sudah ada, datanya ditimpa/diperbarui
-REPLACE INTO admins (username, password_hash, full_name) 
+REPLACE INTO admins (username, password_hash, full_name)
 VALUES ('admin', '$argon2id$v=19$m=65536,t=3,p=4$tyguG14rc+qzLFHWoV57FQ$c3KWwTYMdABGSEgfRiA7/ZfrcHZKoqrsByDi5ySi3pY', 'Administrator SMAN 10');
 
 -- =====================================================
@@ -120,6 +120,34 @@ CREATE TABLE IF NOT EXISTS map_elements (
 
   UNIQUE KEY uk_map_svg_element (map_id, svg_element_id),
   INDEX idx_map_elements_location (location_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- 6. Tabel contacts (Layanan & Kontak Unit Sekolah)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS contacts (
+  contact_id INT AUTO_INCREMENT PRIMARY KEY,
+  unit_name VARCHAR(150) NOT NULL,
+  description TEXT NULL,
+  phone VARCHAR(50) NULL,
+  email VARCHAR(100) NULL,
+  sort_order INT NOT NULL DEFAULT 0,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  INDEX idx_contacts_sort (sort_order, is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- 7. Tabel school_profile (Sejarah, Visi, Misi)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS school_profile (
+  profile_id INT AUTO_INCREMENT PRIMARY KEY,
+  section_key VARCHAR(50) NOT NULL UNIQUE,
+  title VARCHAR(150) NULL,
+  content TEXT NOT NULL,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
@@ -231,7 +259,25 @@ REPLACE INTO map_elements (map_id, location_id, svg_element_id) VALUES
 (1, 52, 'Pos-Punggawa-1'),
 (1, 53, 'Pos-Punggawa-2');
 
+-- =====================================================
+-- Seed Data untuk Tabel contacts
+-- =====================================================
+REPLACE INTO contacts (contact_id, unit_name, description, phone, email, sort_order, is_active) VALUES
+(1, 'Tata Usaha (TU)', 'Layanan administrasi kesiswaan dan surat-menyurat.', '(0541) 123456', NULL, 1, 1),
+(2, 'Bimbingan Konseling (BK)', 'Konsultasi akademik dan pengembangan karier siswa.', '(0541) 123457', NULL, 2, 1),
+(3, 'Perpustakaan SMARIDASA', 'Pusat literasi dan referensi belajar siswa.', '(0541) 123458', NULL, 3, 1);
 
+-- =====================================================
+-- Seed Data untuk Tabel school_profile
+-- =====================================================
+REPLACE INTO school_profile (profile_id, section_key, title, content) VALUES
+(1, 'sejarah', 'Sejarah Singkat', 'SMA Negeri 10 Samarinda (SMARIDASA) adalah salah satu institusi pendidikan menengah atas unggulan di Kalimantan Timur yang berkomitmen mencetak generasi berprestasi, berkarakter, dan berwawasan global.'),
+(2, 'visi', 'Visi', 'Terwujudnya sekolah unggul yang menghasilkan lulusan cerdas, berakhlak mulia, kompetitif, dan cinta lingkungan.'),
+(3, 'misi', 'Misi', '1. Menyelenggarakan pembelajaran yang efektif dan berorientasi pada pengembangan potensi peserta didik.\n2. Menanamkan nilai keimanan, ketakwaan, dan budi pekerti luhur.\n3. Mendorong keunggulan akademik maupun non-akademik melalui ekstrakurikuler dan kompetisi.');
+
+-- =====================================================
+-- Tabel chess_rooms
+-- =====================================================
 CREATE TABLE IF NOT EXISTS chess_rooms (
   room_code VARCHAR(10) PRIMARY KEY,
   game_state JSON NOT NULL,

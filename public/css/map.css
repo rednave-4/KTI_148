@@ -14,7 +14,7 @@
 
 /* Controls Bar (Search & Selectors) */
 .map-controls {
-  background: var(--white);
+  background: var(--card, var(--white));
   padding: 1rem;
   border-radius: var(--radius);
   border: 1px solid var(--border);
@@ -38,6 +38,8 @@
   border: 1px solid var(--border);
   border-radius: var(--radius);
   font-size: 0.95rem;
+  background: var(--white);
+  color: var(--text);
 }
 
 .search-results-dropdown {
@@ -45,7 +47,7 @@
   top: 100%;
   left: 0;
   right: 0;
-  background: var(--white);
+  background: var(--card, var(--white));
   border: 1px solid var(--border);
   border-radius: 0 0 var(--radius) var(--radius);
   box-shadow: var(--shadow);
@@ -63,7 +65,7 @@
 }
 
 .search-result-item:hover {
-  background: #f1f5f9;
+  background: var(--bg);
 }
 
 .search-result-item strong {
@@ -75,45 +77,111 @@
   color: var(--text-light);
 }
 
-/* SVG Viewport Container */
-.svg-viewport {
-  background: var(--white);
+/* Tombol Zoom */
+.map-zoom-controls {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.map-zoom-controls button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card, var(--white));
+  color: var(--text);
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.15s ease;
+}
+
+.map-zoom-controls button:hover {
+  border-color: var(--accent, #ff3333);
+}
+
+/* Viewport Zoom & Pan */
+.map-viewport {
+  position: relative;
+  overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1.5rem;
-  min-height: 500px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: auto;
+  background: #e8f0e8;
+  min-height: 450px;
+  cursor: grab;
+  touch-action: none;
   box-shadow: var(--shadow);
 }
 
-.svg-viewport svg {
+.map-viewport.is-panning,
+.map-viewport.dragging {
+  cursor: grabbing;
+}
+
+.svg-viewport {
   width: 100%;
+  min-height: 450px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+}
+
+#svg-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform-origin: center center;
+  transition: transform 0.15s ease-out;
+  cursor: grab;
+}
+
+.map-viewport.is-panning #svg-container,
+.map-viewport.dragging #svg-container,
+#svg-container.dragging {
+  cursor: grabbing;
+  transition: none;
+}
+
+#svg-container svg {
+  width: 100%;
+  max-width: 100%;
   height: auto;
   max-height: 600px;
+  display: block;
+  user-select: none;
 }
 
-/* Stylings Interaktif untuk Elemen SVG */
+/* Highlight: isi (fill) + tepi (stroke) untuk grup maupun bentuk SVG */
 .map-location {
   cursor: pointer;
-  transition: fill 0.3s ease, stroke 0.3s ease, stroke-width 0.3s ease;
+  transition: fill 0.2s ease, stroke 0.2s ease, filter 0.2s ease;
 }
 
-.map-location:hover {
-  fill-opacity: 0.8;
-  stroke: #2563eb !important;
+.map-location:hover,
+.map-location:hover path,
+.map-location:hover rect,
+.map-location:hover polygon,
+.map-location:hover circle,
+.map-location:hover ellipse {
+  stroke: var(--primary) !important;
+  stroke-width: 2.5px !important;
+}
+
+.map-location.active,
+.map-location.active path,
+.map-location.active rect,
+.map-location.active polygon,
+.map-location.active circle,
+.map-location.active ellipse {
+  fill: rgba(255, 51, 51, 0.45) !important;
+  fill-opacity: 0.85 !important;
+  stroke: #ff3333 !important;
   stroke-width: 3px !important;
-}
-
-/* State Highlight Otomatis / Aktif */
-.map-location.active {
-  fill: #facc15 !important; /* Warna Kuning Emas */
-  fill-opacity: 0.95 !important;
-  stroke: #2563eb !important; /* Border Biru */
-  stroke-width: 4px !important;
-  filter: drop-shadow(0px 0px 8px rgba(37, 99, 235, 0.6));
+  filter: brightness(1.08);
 }
 
 /* Panel Informasi Lokasi */
@@ -133,30 +201,12 @@
   margin-bottom: 0.5rem;
 }
 
-.svg-viewport {
-  overflow: hidden; /* penting agar denah tidak keluar area */
-  position: relative;
-  touch-action: none; /* biar drag di HP lebih stabil */
+html.dark .map-viewport {
+  background: #242424;
+  border-color: var(--border);
 }
 
-#svg-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transform-origin: center center;
-  transition: transform 0.15s ease;
-  cursor: grab;
-}
-
-#svg-container.dragging {
-  cursor: grabbing;
-  transition: none;
-}
-
-#svg-container svg {
-  max-width: 100%;
-  height: auto;
-  user-select: none;
+html.dark .info-badge {
+  background: var(--bg);
+  color: var(--link);
 }

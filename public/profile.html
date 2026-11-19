@@ -7,50 +7,76 @@
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <!-- Floating Theme Toggle Button -->
-  <button id="theme-toggle" class="floating-theme-btn" aria-label="Toggle Theme">🌙</button>
+  <nav class="navbar">
+    <a href="/" class="nav-brand">SMARIDASA</a>
+    <ul class="nav-links">
+      <li><a href="/">Beranda</a></li>
+      <li><a href="/announcements.html">Pengumuman</a></li>
+      <li><a href="/map.html">Denah Sekolah</a></li>
+      <li><a href="/info.html" class="active">Informasi Sekolah</a></li>
+      <li><a href="/admin/login.html">Login</a></li>
+    </ul>
+  </nav>
 
-  <header>
-    <nav class="navbar">
-      <div class="logo">SMARIDASA</div>
-      <ul class="nav-links">
-        <li><a href="/index.html">Beranda</a></li>
-        <li><a href="/announcements.html">Pengumuman</a></li>
-        <li><a href="/map.html">Denah Sekolah</a></li>
-        <li><a href="/profile.html" class="active">Profil</a></li>
-      </ul>
-    </nav>
-  </header>
+  <main class="container">
+    <p style="margin-bottom: 1rem;"><a href="/info.html">&larr; Kembali ke Informasi Sekolah</a></p>
+    <h1 style="color: var(--primary); margin-bottom: 0.5rem;">Profil SMA Negeri 10 Samarinda</h1>
+    <p style="color: var(--text-light); margin-bottom: 2rem;">Sejarah singkat, visi, dan misi SMARIDASA.</p>
 
-  <main class="container" style="padding: 2rem 1rem; max-width: 800px; margin: 0 auto;">
-    <h1 style="color: var(--primary); margin-bottom: 1rem;">Profil SMA Negeri 10 Samarinda (SMARIDASA)</h1>
-    
-    <section style="margin-bottom: 2rem;">
-      <h2 style="color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem;">Sejarah Singkat</h2>
-      <p style="line-height: 1.6; color: inherit;">
-        SMA Negeri 10 Samarinda (SMARIDASA) adalah salah satu institusi pendidikan menengah atas unggulan di Kalimantan Timur yang berkomitmen untuk mencetak generasi yang berprestasi, berkarakter, dan berwawasan global.
-      </p>
-    </section>
-
-    <section style="margin-bottom: 2rem;">
-      <h2 style="color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem;">Visi & Misi</h2>
-      <h3 style="font-size: 1.1rem; margin-top: 0.5rem;">Visi:</h3>
-      <p style="line-height: 1.6; font-style: italic; margin-bottom: 1rem;">
-        "Terwujudnya sekolah unggul yang menghasilkan lulusan cerdas, berakhlak mulia, kompetitif, dan cinta lingkungan."
-      </p>
-      <h3 style="font-size: 1.1rem; margin-top: 0.5rem;">Misi:</h3>
-      <ul style="line-height: 1.6; padding-left: 1.5rem;">
-        <li>Menyelenggarakan proses pembelajaran yang efektif dan berorientasi pada pengembangan potensi peserta didik.</li>
-        <li>Menanamkan nilai-nilai keimanan, ketakwaan, dan budi pekerti luhur dalam kehidupan sehari-hari.</li>
-        <li>Mendorong keunggulan dalam bidang akademik maupun non-akademik melalui kegiatan ekstrakurikuler dan kompetisi.</li>
-      </ul>
-    </section>
+    <div id="profile-container" style="display: grid; gap: 1.25rem;">
+      <div class="card">
+        <h3 style="color: var(--primary); margin-bottom: 0.5rem;">Sejarah Singkat</h3>
+        <p id="profile-sejarah" style="white-space: pre-line; color: var(--text-light);">Memuat profil...</p>
+      </div>
+      <div class="card">
+        <h3 style="color: var(--primary); margin-bottom: 0.5rem;">Visi</h3>
+        <p id="profile-visi" style="white-space: pre-line; color: var(--text-light);">Memuat visi...</p>
+      </div>
+      <div class="card">
+        <h3 style="color: var(--primary); margin-bottom: 0.5rem;">Misi</h3>
+        <p id="profile-misi" style="white-space: pre-line; color: var(--text-light);">Memuat misi...</p>
+      </div>
+    </div>
   </main>
 
-  <footer style="text-align: center; padding: 1.5rem; color: var(--text-light); font-size: 0.9rem;">
-    &copy; 2026 SMARIDASA. Seluruh hak cipta dilindungi.
+  <footer>
+    <p>&copy; TIM KTI - 148: Jonathan Doxan P. ; Raphael Evander L.R. ; Zacky Ayyatullah</p>
   </footer>
 
-  <script src="/js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const res = await fetch('/api/profile');
+        const result = await res.json();
+        if (!result.success || !Array.isArray(result.data)) return;
+
+        result.data.forEach((sec) => {
+          const el = document.getElementById(`profile-${sec.section_key}`);
+          if (el) el.textContent = sec.content;
+        });
+      } catch (err) {
+        console.error('Gagal memuat profil sekolah:', err);
+      }
+    });
+  </script>
+  <button id="theme-toggle" class="floating-theme-btn" aria-label="Ganti Tema">🌙</button>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const toggleBtn = document.getElementById('theme-toggle');
+      if (!toggleBtn) return;
+      const updateIcon = () => {
+        toggleBtn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+      };
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+      updateIcon();
+      toggleBtn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        updateIcon();
+      });
+    });
+  </script>
 </body>
 </html>

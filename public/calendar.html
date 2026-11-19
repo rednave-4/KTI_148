@@ -10,65 +10,75 @@
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 0.5rem;
-      margin-top: 1.5rem;
     }
     .calendar-day-header {
       text-align: center;
-      font-weight: bold;
-      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.85rem;
       padding: 0.5rem;
+      color: var(--text-light);
     }
     .calendar-cell {
-      min-height: 90px;
+      min-height: 96px;
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0.5rem;
-      background: var(--card-bg, #fff);
-      position: relative;
+      border-radius: 8px;
+      padding: 0.45rem;
+      background: var(--card);
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .calendar-cell.empty {
+      background: transparent;
+      border-style: dashed;
+      opacity: 0.45;
     }
     .calendar-date {
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 0.25rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-light);
     }
     .calendar-event {
+      display: block;
+      font-size: 0.72rem;
+      padding: 0.2rem 0.35rem;
+      border-radius: 4px;
       background: var(--primary);
-      color: #fff;
-      font-size: 0.7rem;
-      padding: 2px 4px;
-      border-radius: 3px;
-      margin-bottom: 2px;
+      color: #fff !important;
+      text-decoration: none;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    @media (max-width: 700px) {
+      .calendar-cell { min-height: 70px; }
+      .calendar-event { font-size: 0.65rem; }
+    }
   </style>
 </head>
 <body>
-  <button id="theme-toggle" class="floating-theme-btn" aria-label="Toggle Theme">🌙</button>
+  <nav class="navbar">
+    <a href="/" class="nav-brand">SMARIDASA</a>
+    <ul class="nav-links">
+      <li><a href="/">Beranda</a></li>
+      <li><a href="/announcements.html">Pengumuman</a></li>
+      <li><a href="/map.html">Denah Sekolah</a></li>
+      <li><a href="/info.html" class="active">Informasi Sekolah</a></li>
+      <li><a href="/admin/login.html">Login</a></li>
+    </ul>
+  </nav>
 
-  <header>
-    <nav class="navbar">
-      <div class="logo">SMARIDASA</div>
-      <ul class="nav-links">
-        <li><a href="/index.html">Beranda</a></li>
-        <li><a href="/announcements.html">Pengumuman</a></li>
-        <li><a href="/calendar.html" class="active">Kalender</a></li>
-        <li><a href="/map.html">Denah Sekolah</a></li>
-      </ul>
-    </nav>
-  </header>
-
-  <main class="container" style="padding: 2rem 1rem; max-width: 900px; margin: 0 auto;">
+  <main class="container">
+    <p style="margin-bottom: 1rem;"><a href="/info.html">&larr; Kembali ke Informasi Sekolah</a></p>
     <h1 style="color: var(--primary); margin-bottom: 0.5rem;">Kalender Kegiatan Sekolah</h1>
-    <p style="color: var(--text-light); margin-bottom: 1.5rem;">Agenda bulanan kegiatan dan pengumuman penting SMARIDASA.</p>
+    <p style="color: var(--text-light); margin-bottom: 1.5rem;">Agenda bulanan yang diambil langsung dari pengumuman resmi sekolah.</p>
 
-    <!-- Kontrol Bulan Sederhana -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-      <h2 id="current-month-year" style="font-size: 1.2rem; color: var(--text);">November 2026</h2>
+      <button type="button" id="prev-month" class="btn btn-secondary">‹</button>
+      <h2 id="current-month-year" style="font-size: 1.2rem;"></h2>
+      <button type="button" id="next-month" class="btn btn-secondary">›</button>
     </div>
 
-    <!-- Grid Kalender -->
     <div class="calendar-grid">
       <div class="calendar-day-header">Min</div>
       <div class="calendar-day-header">Sen</div>
@@ -77,33 +87,34 @@
       <div class="calendar-day-header">Kam</div>
       <div class="calendar-day-header">Jum</div>
       <div class="calendar-day-header">Sab</div>
-
-      <!-- Contoh Sel Kalender Statis/Dinamis -->
-      <div class="calendar-cell"><div class="calendar-date">1</div></div>
-      <div class="calendar-cell"><div class="calendar-date">2</div></div>
-      <div class="calendar-cell"><div class="calendar-date">3</div></div>
-      <div class="calendar-cell"><div class="calendar-date">4</div></div>
-      <div class="calendar-cell"><div class="calendar-date">5</div></div>
-      <div class="calendar-cell"><div class="calendar-date">6</div></div>
-      <div class="calendar-cell"><div class="calendar-date">7</div></div>
-      
-      <div class="calendar-cell"><div class="calendar-date">8</div></div>
-      <div class="calendar-cell"><div class="calendar-date">9</div></div>
-      <div class="calendar-cell">
-        <div class="calendar-date">10</div>
-        <div class="calendar-event">Upacara Bendera</div>
-      </div>
-      <div class="calendar-cell"><div class="calendar-date">11</div></div>
-      <div class="calendar-cell"><div class="calendar-date">12</div></div>
-      <div class="calendar-cell"><div class="calendar-date">13</div></div>
-      <div class="calendar-cell"><div class="calendar-date">14</div></div>
     </div>
+
+    <div class="calendar-grid" id="calendar-grid-body" style="margin-top: 0.25rem;"></div>
   </main>
 
-  <footer style="text-align: center; padding: 1.5rem; color: var(--text-light); font-size: 0.9rem;">
-    &copy; 2026 SMARIDASA. Seluruh hak cipta dilindungi.
+  <footer>
+    <p>&copy; TIM KTI - 148: Jonathan Doxan P. ; Raphael Evander L.R. ; Zacky Ayyatullah</p>
   </footer>
 
-  <script src="/js/main.js"></script>
+  <script src="/js/calendar.js"></script>
+  <button id="theme-toggle" class="floating-theme-btn" aria-label="Ganti Tema">🌙</button>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const toggleBtn = document.getElementById('theme-toggle');
+      if (!toggleBtn) return;
+      const updateIcon = () => {
+        toggleBtn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+      };
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+      updateIcon();
+      toggleBtn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        updateIcon();
+      });
+    });
+  </script>
 </body>
 </html>

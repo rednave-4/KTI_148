@@ -15,6 +15,7 @@
       <li><a href="/">Beranda</a></li>
       <li><a href="/announcements.html">Pengumuman</a></li>
       <li><a href="/map.html" class="active">Denah Sekolah</a></li>
+      <li><a href="/info.html">Informasi Sekolah</a></li>
       <li><a href="/admin/login.html">Login</a></li>
     </ul>
   </nav>
@@ -30,10 +31,10 @@
         <div id="search-results" class="search-results-dropdown"></div>
       </div>
 
-      <div style="display: flex; gap: 0.4rem; align-items: center;">
-        <button type="button" id="zoom-out-btn" class="btn btn-secondary" style="padding: 0.4rem 0.7rem;">−</button>
-        <button type="button" id="zoom-reset-btn" class="btn btn-secondary" style="padding: 0.4rem 0.7rem;">Reset</button>
-        <button type="button" id="zoom-in-btn" class="btn btn-secondary" style="padding: 0.4rem 0.7rem;">+</button>
+      <div class="map-zoom-controls" style="display: flex; gap: 0.4rem; align-items: center;">
+        <button type="button" id="zoom-in" class="btn btn-secondary" title="Perbesar" style="padding: 0.4rem 0.7rem;">+</button>
+        <button type="button" id="zoom-out" class="btn btn-secondary" title="Perkecil" style="padding: 0.4rem 0.7rem;">−</button>
+        <button type="button" id="zoom-reset" class="btn btn-secondary" title="Reset" style="padding: 0.4rem 0.7rem;">⟲</button>
       </div>
 
       <div style="display: flex; gap: 0.5rem; align-items: center;">
@@ -48,18 +49,26 @@
 
     <!-- Main Map Layout -->
     <div class="map-page-layout">
-      <!-- Container Penampung SVG -->
-      <div class="svg-viewport" id="svg-container">
-        <p style="color: var(--text-light);">Memuat peta SVG...</p>
+      <!-- Wrapper Zoom/Pan + Container Penampung SVG -->
+      <div class="map-viewport" id="map-viewport">
+        <div class="svg-viewport" id="svg-container">
+          <p style="color: var(--text-light);">Memuat peta SVG...</p>
+        </div>
       </div>
 
       <!-- Panel Informasi Detail Lokasi -->
       <div class="card location-info-panel" id="info-panel">
         <span class="info-badge" id="info-type">PETUNJUK</span>
         <h3 id="info-title" style="color: var(--primary); margin-bottom: 0.5rem;">Pilih Lokasi</h3>
-        <p id="info-description" style="color: var(--text-light); font-size: 0.95rem; margin-bottom: 1rem;">
+
+        <div id="info-photo-wrap" style="margin-bottom: 0.75rem; display: none;">
+          <img id="info-photo" alt="Foto lokasi" style="width: 100%; border-radius: 8px; max-height: 180px; object-fit: cover;">
+        </div>
+
+        <p id="info-description" style="color: var(--text-light); font-size: 0.95rem; margin-bottom: 0.75rem;">
           Klik pada ruangan/gedung di denah atau gunakan pencarian di atas untuk melihat detail informasi lokasi.
         </p>
+
         <div id="info-extra"></div>
       </div>
     </div>
@@ -72,11 +81,11 @@
   <script src="/js/map.js"></script>
 
   <!-- Tombol Toggle Tema Melayang di Pojok Kanan Bawah -->
-  <button id="theme-toggle" class="floating-theme-btn" 
-    style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; 
-          width: 48px; height: 48px; border-radius: 50%; 
-          background-color: #1e293b; color: #f8fafc; 
-          border: none; cursor: pointer; 
+  <button id="theme-toggle" class="floating-theme-btn"
+    style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+          width: 48px; height: 48px; border-radius: 50%;
+          background-color: #1e293b; color: #f8fafc;
+          border: none; cursor: pointer;
           box-shadow: 0 4px 6px rgba(0,0,0,0.2);
           font-size: 1.25rem; display: flex; align-items: center; justify-content: center;
           transition: transform 0.2s, background-color 0.2s;">

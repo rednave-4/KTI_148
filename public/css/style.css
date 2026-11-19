@@ -185,8 +185,8 @@ footer {
   z-index: 9999;
   padding: 12px 16px;
   border-radius: 50px;
-  background-color: #1e293b;
-  color: #f8fafc;
+  background-color: var(--card);
+  color: var(--text);
   border: none;
   cursor: pointer;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
@@ -219,7 +219,7 @@ html.dark .login-card {
 html.dark input,
 html.dark textarea,
 html.dark select {
-  background-color: #2e2e2e !important;
+  background-color: var(--bg) !important;
   color: var(--text) !important;
   border: 1px solid var(--border) !important;
 }
@@ -341,7 +341,7 @@ html.dark .error-message {
 }
 
 .admin-table th {
-  background: #f1f5f9;
+  background: var(--bg);
   color: var(--primary);
   font-weight: 600;
 }
@@ -361,7 +361,7 @@ html.dark .error-message {
   }
 
   .admin-table tr {
-    background: var(--white);
+    background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     margin-bottom: 1rem;

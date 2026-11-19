@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Informasi Sekolah - SMARIDASA</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="nav-brand">SMARIDASA</a>
+    <ul class="nav-links">
+      <li><a href="/">Beranda</a></li>
+      <li><a href="/announcements.html">Pengumuman</a></li>
+      <li><a href="/map.html">Denah Sekolah</a></li>
+      <li><a href="/info.html" class="active">Informasi Sekolah</a></li>
+      <li><a href="/admin/login.html">Login</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
+    <h1 style="color: var(--primary); margin-bottom: 0.5rem;">Informasi Sekolah</h1>
+    <p style="color: var(--text-light); margin-bottom: 2rem;">Profil, kontak penting, dan kalender kegiatan SMARIDASA.</p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem;">
+      <a href="/profile.html" class="card" style="text-decoration: none; color: inherit;">
+        <h3 style="color: var(--primary); margin-bottom: 0.5rem;">Profil Sekolah</h3>
+        <p style="color: var(--text-light); font-size: 0.95rem;">Sejarah singkat, visi, dan misi SMARIDASA.</p>
+      </a>
+      <a href="/contacts.html" class="card" style="text-decoration: none; color: inherit;">
+        <h3 style="color: var(--primary); margin-bottom: 0.5rem;">Direktori Kontak</h3>
+        <p style="color: var(--text-light); font-size: 0.95rem;">Nomor unit layanan resmi di lingkungan sekolah.</p>
+      </a>
+      <a href="/calendar.html" class="card" style="text-decoration: none; color: inherit;">
+        <h3 style="color: var(--primary); margin-bottom: 0.5rem;">Kalender Kegiatan</h3>
+        <p style="color: var(--text-light); font-size: 0.95rem;">Agenda bulanan dari pengumuman resmi sekolah.</p>
+      </a>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; TIM KTI - 148: Jonathan Doxan P. ; Raphael Evander L.R. ; Zacky Ayyatullah</p>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <button id="theme-toggle" class="floating-theme-btn" aria-label="Ganti Tema">🌙</button>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const toggleBtn = document.getElementById('theme-toggle');
+      if (!toggleBtn) return;
+      const updateIcon = () => {
+        toggleBtn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+      };
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+      updateIcon();
+      toggleBtn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        updateIcon();
+      });
+    });
+  </script>
+</body>
+</html>

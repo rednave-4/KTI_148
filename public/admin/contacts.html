@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelola Kontak Unit - Admin SMARIDASA</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/admin/dashboard.html" class="nav-brand">SMARIDASA Admin</a>
+    <ul class="nav-links">
+      <li><a href="/admin/dashboard.html">Dashboard</a></li>
+      <li><a href="/admin/contacts.html" class="active">Kontak Unit</a></li>
+      <li><a href="/">Lihat Situs</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
+    <h1 style="color: var(--primary); margin-bottom: 0.5rem;">Kelola Kontak Unit Sekolah</h1>
+    <p style="color: var(--text-light); margin-bottom: 1.5rem;">Tambah, ubah, atau hapus daftar kontak unit layanan.</p>
+
+    <div class="card" style="margin-bottom: 2rem;">
+      <h3 id="form-heading" style="color: var(--primary); margin-bottom: 1rem;">Tambah Kontak Baru</h3>
+      <form id="contact-form" style="display: grid; gap: 1rem;">
+        <input type="hidden" id="contact-id">
+
+        <div>
+          <label for="unit-name">Nama Unit *</label>
+          <input type="text" id="unit-name" required placeholder="Contoh: Tata Usaha (TU)" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border);">
+        </div>
+
+        <div>
+          <label for="description">Deskripsi</label>
+          <textarea id="description" rows="2" placeholder="Layanan administrasi..." style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border);"></textarea>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+          <div>
+            <label for="phone">Telepon</label>
+            <input type="text" id="phone" placeholder="(0541) 123456" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border);">
+          </div>
+          <div>
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="tu@sman10smd.sch.id" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border);">
+          </div>
+          <div>
+            <label for="sort-order">Urutan</label>
+            <input type="number" id="sort-order" value="0" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border);">
+          </div>
+        </div>
+
+        <div>
+          <label style="display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer;">
+            <input type="checkbox" id="is-active" checked> Aktif ditampilkan ke publik
+          </label>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          <button type="submit" class="btn btn-primary" id="save-contact-btn">Simpan Kontak</button>
+          <button type="button" class="btn btn-secondary" id="cancel-edit-btn" style="display: none;">Batal Edit</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3 style="color: var(--primary); margin-bottom: 1rem;">Daftar Kontak Unit</h3>
+      <div class="table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Unit</th>
+              <th>Telepon</th>
+              <th>Email</th>
+              <th>Urutan</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="admin-contacts-body">
+            <tr><td colspan="6">Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('contact-form');
+      const tbody = document.getElementById('admin-contacts-body');
+      const cancelBtn = document.getElementById('cancel-edit-btn');
+      const heading = document.getElementById('form-heading');
+      let contactsCache = [];
+
+      async function loadContacts() {
+        try {
+          const res = await fetch('/api/contacts/admin');
+          if (res.status === 401 || res.status === 403) {
+            window.location.href = '/admin/login.html';
+            return;
+          }
+          const result = await res.json();
+          contactsCache = result.data || [];
+          renderTable();
+        } catch (err) {
+          tbody.innerHTML = '<tr><td colspan="6">Gagal memuat data kontak.</td></tr>';
+        }
+      }
+
+      function renderTable() {
+        if (!contactsCache.length) {
+          tbody.innerHTML = '<tr><td colspan="6">Belum ada kontak tersimpan.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = contactsCache.map(c => `
+          <tr>
+            <td data-label="Unit"><strong>${escapeHtml(c.unit_name)}</strong><br><small style="color:var(--text-light)">${escapeHtml(c.description || '')}</small></td>
+            <td data-label="Telepon">${escapeHtml(c.phone || '-')}</td>
+            <td data-label="Email">${escapeHtml(c.email || '-')}</td>
+            <td data-label="Urutan">${c.sort_order}</td>
+            <td data-label="Status">${c.is_active ? 'Aktif' : 'Nonaktif'}</td>
+            <td data-label="Aksi">
+              <button type="button" class="btn btn-secondary" style="padding: 0.35rem 0.7rem; font-size: 0.82rem;" onclick="editContact(${c.contact_id})">Edit</button>
+              <button type="button" class="btn btn-danger" style="padding: 0.35rem 0.7rem; font-size: 0.82rem;" onclick="deleteContact(${c.contact_id})">Hapus</button>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      window.editContact = (id) => {
+        const item = contactsCache.find(c => c.contact_id === id);
+        if (!item) return;
+        document.getElementById('contact-id').value = item.contact_id;
+        document.getElementById('unit-name').value = item.unit_name || '';
+        document.getElementById('description').value = item.description || '';
+        document.getElementById('phone').value = item.phone || '';
+        document.getElementById('email').value = item.email || '';
+        document.getElementById('sort-order').value = item.sort_order ?? 0;
+        document.getElementById('is-active').checked = Boolean(item.is_active);
+        heading.textContent = 'Edit Kontak';
+        cancelBtn.style.display = 'inline-block';
+      };
+
+      window.deleteContact = async (id) => {
+        if (!confirm('Hapus kontak ini?')) return;
+        const res = await fetch(`/api/contacts/admin/${id}`, { method: 'DELETE' });
+        const result = await res.json();
+        if (result.success) loadContacts();
+      };
+
+      function resetForm() {
+        form.reset();
+        document.getElementById('contact-id').value = '';
+        heading.textContent = 'Tambah Kontak Baru';
+        cancelBtn.style.display = 'none';
+      }
+
+      cancelBtn.addEventListener('click', resetForm);
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('contact-id').value;
+        const payload = {
+          unit_name: document.getElementById('unit-name').value.trim(),
+          description: document.getElementById('description').value.trim(),
+          phone: document.getElementById('phone').value.trim(),
+          email: document.getElementById('email').value.trim(),
+          sort_order: Number(document.getElementById('sort-order').value || 0),
+          is_active: document.getElementById('is-active').checked ? 1 : 0
+        };
+
+        const url = id ? `/api/contacts/admin/${id}` : '/api/contacts/admin';
+        const method = id ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        if (result.success) {
+          resetForm();
+          loadContacts();
+        } else {
+          alert(result.message || 'Gagal menyimpan kontak.');
+        }
+      });
+
+      function escapeHtml(text) {
+        if (!text) return '';
+        return String(text)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      loadContacts();
+    });
+  </script>
+</body>
+</html>

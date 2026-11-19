@@ -34,10 +34,14 @@ app.use(session({
 const authRoutes = require('./routes/authRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
 const locationRoutes = require('./routes/locationRoutes');
+const contactRoutes = require('./routes/contactRoutes');
+const profileRoutes = require('./routes/profileRoutes');
 
 app.use('/api/admin/auth', authRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/locations', locationRoutes);
+app.use('/api/contacts', contactRoutes);
+app.use('/api/profile', profileRoutes);
 // ====================================================
 
 // Health Check Endpoint
