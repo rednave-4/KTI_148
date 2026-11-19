@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const url = '/api/announcements' + (params.toString() ? `?${params.toString()}` : '');
       const response = await fetch(url);
       const result = await response.json();
-      
+
       if (result.success) {
         allAnnouncements = result.data;
         applySortAndRender();
@@ -57,43 +57,80 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderAnnouncements(data) {
-    if (data.length === 0) {
-      container.innerHTML = `<p style="color: var(--text-light);">Tidak ada pengumuman yang cocok dengan filter/pencarian.</p>`;
+    if (!data.length) {
+      container.innerHTML = `<p style="color: var(--text-light);">Belum ada pengumuman tersedia.</p>`;
       return;
     }
 
-    container.innerHTML = data.map(item => {
+    container.innerHTML = data.map((item, idx) => {
       const isDone = item.computed_status === 'done';
-      const badgeStyle = isDone 
-        ? 'background-color: #64748b; color: white;' 
+      const badgeStyle = isDone
+        ? 'background-color: #64748b; color: white;'
         : 'background-color: #2563eb; color: white;';
-      const statusText = isDone ? 'SELESAI' : 'AKTIF';
+      const statusText = isDone ? 'SELESAI (DONE)' : 'AKTIF';
       const cat = (item.category || 'umum').toLowerCase();
       const catLabel = categoryLabels[cat] || cat;
+      const descFull = item.description || '';
+      const descShort = descFull.length > 100 ? descFull.substring(0, 100) + '...' : descFull;
+      const detailUrl = `/announcement-detail.html?id=${item.announcement_id}`;
 
       return `
-        <div class="card" style="border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; position: relative; opacity: ${isDone ? '0.85' : '1'};">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; gap: 0.5rem;">
-            <h3 style="margin: 0; color: var(--primary); font-size: 1.2rem;">${escapeHtml(item.title)}</h3>
-            <span style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 600; white-space: nowrap; ${badgeStyle}">
-              ${statusText}
-            </span>
+        <div class="flip-card" data-flip-id="${idx}" style="opacity: ${isDone ? '0.88' : '1'};">
+          <div class="flip-card-inner">
+            <!-- DEPAN -->
+            <div class="flip-card-front">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem; margin-bottom:0.75rem;">
+                <h3 style="margin:0; color:var(--primary); font-size:1.15rem;">${escapeHtml(item.title)}</h3>
+                <span style="font-size:0.75rem; padding:0.25rem 0.6rem; border-radius:20px; font-weight:600; white-space:nowrap; ${badgeStyle}">
+                  ${statusText}
+                </span>
+              </div>
+              <div style="margin-bottom:0.75rem;">
+                <span class="category-badge cat-${cat}">${catLabel}</span>
+              </div>
+              <p style="font-size:0.85rem; color:var(--text-light); margin-bottom:1rem;">
+                📅 ${escapeHtml(String(item.event_date || '-'))} | 📍 ${escapeHtml(item.location_name || 'Area Sekolah')}
+              </p>
+              <p style="font-size:0.95rem; margin-bottom:1.25rem; flex:1;">
+                ${escapeHtml(descShort)}
+              </p>
+              <a href="${detailUrl}" class="btn btn-detail" style="align-self:flex-start; font-size:0.85rem; padding:0.5rem 1rem; text-decoration:none; border-radius:6px;">
+                Baca Selengkapnya
+              </a>
+              <p class="flip-hint">Klik area kartu untuk membalik</p>
+            </div>
+
+            <!-- BELAKANG -->
+            <div class="flip-card-back">
+              <h3 style="margin:0 0 0.75rem; color:var(--primary); font-size:1.1rem;">${escapeHtml(item.title)}</h3>
+              <p style="font-size:0.85rem; color:var(--text-light); margin-bottom:0.75rem;">
+                📅 ${escapeHtml(String(item.event_date || '-'))}<br>
+                ⏰ ${escapeHtml(String(item.start_time || ''))}${item.end_time ? ' s.d. ' + escapeHtml(String(item.end_time)) : ''}<br>
+                📍 ${escapeHtml(item.location_name || 'Area Sekolah')}
+              </p>
+              <p style="font-size:0.92rem; line-height:1.6; white-space:pre-line; flex:1;">
+                ${escapeHtml(descFull || 'Tidak ada deskripsi.')}
+              </p>
+              <a href="${detailUrl}" class="btn btn-detail" style="align-self:flex-start; margin-top:1rem; font-size:0.85rem; padding:0.5rem 1rem; text-decoration:none; border-radius:6px;">
+                Baca Selengkapnya
+              </a>
+              <p class="flip-hint">Klik area kartu untuk kembali</p>
+            </div>
           </div>
-          <div style="margin-bottom: 0.75rem;">
-            <span class="category-badge cat-${cat}">${catLabel}</span>
-          </div>
-          <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1rem;">
-            📅 ${item.event_date || '-'} | 📍 ${escapeHtml(item.location_name || 'Area Sekolah')}
-          </p>
-          <p style="font-size: 0.95rem; margin-bottom: 1.5rem; color: inherit;">
-            ${item.description ? escapeHtml(item.description.substring(0, 100)) + '...' : ''}
-          </p>
-          <a href="/announcement-detail.html?id=${item.announcement_id}" class="btn" style="display: inline-block; font-size: 0.85rem; padding: 0.5rem 1rem; text-decoration: none; border-radius: 6px;">
-            Baca Selengkapnya
-          </a>
         </div>
       `;
     }).join('');
+
+    bindFlipCards();
+  }
+
+  function bindFlipCards() {
+    document.querySelectorAll('.flip-card').forEach((card) => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-detail') || e.target.closest('a')) return;
+        card.classList.toggle('is-flipped');
+      });
+    });
   }
 
   if (sortSelect) {
