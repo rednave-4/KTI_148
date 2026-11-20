@@ -147,7 +147,6 @@ async function loadSvgMap(svgPath) {
 
     const svgContent = await response.text();
     container.innerHTML = svgContent;
-    // setelah: container.innerHTML = svgContent;
     currentActiveElement = null;
     document.querySelectorAll('.map-location-highlight').forEach((n) => n.remove());
     resetMapTransform();
@@ -227,7 +226,6 @@ async function bindSvgElements() {
 }
 
 function highlightSvgElement(el) {
-  // Hapus highlight lama (kotak kuning)
   document.querySelectorAll('.map-location-highlight').forEach((n) => n.remove());
 
   if (currentActiveElement) {
@@ -364,31 +362,46 @@ function setupSearch(searchInput) {
 async function navigateToLocationItem(item) {
   if (item.svg_path) {
     const mapSelect = document.getElementById('map-select');
-    for (let i = 0; i < mapSelect.options.length; i++) {
-      if (mapSelect.options[i].getAttribute('data-svg') === item.svg_path) {
-        mapSelect.selectedIndex = i;
-        await loadSvgMap(item.svg_path);
-        break;
+    if (mapSelect) {
+      for (let i = 0; i < mapSelect.options.length; i++) {
+        if (mapSelect.options[i].getAttribute('data-svg') === item.svg_path) {
+          mapSelect.selectedIndex = i;
+          await loadSvgMap(item.svg_path);
+          break;
+        }
       }
     }
   }
 
   if (item.svg_element_id) {
-    const el = document.getElementById(item.svg_element_id);
+    await new Promise((r) => requestAnimationFrame(r));
+    let el = document.getElementById(item.svg_element_id);
+    if (!el) {
+      await new Promise((r) => setTimeout(r, 50));
+      el = document.getElementById(item.svg_element_id);
+    }
     if (el) highlightSvgElement(el);
   }
 
-  document.getElementById('info-type').innerText = item.location_type || 'RUANGAN';
-  document.getElementById('info-title').innerText = item.name;
-  document.getElementById('info-description').innerText =
-    item.description || 'Tidak ada deskripsi tambahan.';
+  const typeEl = document.getElementById('info-type');
+  const titleEl = document.getElementById('info-title');
+  const descEl = document.getElementById('info-description');
+  const extraEl = document.getElementById('info-extra');
+
+  if (typeEl) typeEl.innerText = item.location_type || 'RUANGAN';
+  if (titleEl) titleEl.innerText = item.name || 'Lokasi';
+  if (descEl) descEl.innerText = item.description || 'Tidak ada deskripsi tambahan.';
   renderLocationPhoto(item.photo_url);
-  document.getElementById('info-extra').innerHTML = item.parent_name
-    ? `<p style="font-size: 0.85rem; color: var(--text-light);"><strong>Gedung/Area:</strong> ${escapeHtml(item.parent_name)}</p>`
-    : '';
+  if (extraEl) {
+    extraEl.innerHTML = item.parent_name
+      ? `<p style="font-size: 0.85rem; color: var(--text-light);"><strong>Gedung/Area:</strong> ${escapeHtml(item.parent_name)}</p>`
+      : '';
+  }
 }
 
 async function navigateToLocationId(locationId) {
+  if (!locationId) return;
+
   try {
     const response = await fetch(`/api/locations/${locationId}/navigation`);
     const result = await response.json();
@@ -397,17 +410,48 @@ async function navigateToLocationId(locationId) {
       const mapInfo = result.map_info;
       const loc = result.location;
 
-      navigateToLocationItem({
+      await navigateToLocationItem({
         name: loc.name,
         location_type: loc.location_type,
         description: loc.description,
         photo_url: loc.photo_url,
+        parent_name: loc.parent_name || null,
         svg_path: mapInfo.svg_path,
         svg_element_id: mapInfo.svg_element_id
       });
+      return;
+    }
+
+    const res2 = await fetch(`/api/locations/${locationId}`);
+    const result2 = await res2.json();
+    if (result2.success && result2.data) {
+      const loc = result2.data;
+      document.getElementById('info-type').innerText = loc.location_type || 'LOKASI';
+      document.getElementById('info-title').innerText = loc.name || 'Lokasi';
+      document.getElementById('info-description').innerText =
+        loc.description || 'Detail lokasi tersedia, tetapi elemen denah belum dipetakan.';
+      renderLocationPhoto(loc.photo_url);
+      document.getElementById('info-extra').innerHTML = loc.parent_name
+        ? `<p style="font-size: 0.85rem; color: var(--text-light);"><strong>Gedung/Area:</strong> ${escapeHtml(loc.parent_name)}</p>`
+        : '';
     }
   } catch (err) {
     console.error('Gagal melakukan navigasi otomatis dari URL:', err);
+  }
+}
+
+function renderLocationPhoto(url) {
+  const wrap = document.getElementById('info-photo-wrap');
+  const img = document.getElementById('info-photo');
+  if (!wrap || !img) return;
+
+  if (url) {
+    img.src = url;
+    img.alt = 'Foto lokasi';
+    wrap.style.display = 'block';
+  } else {
+    img.removeAttribute('src');
+    wrap.style.display = 'none';
   }
 }
 

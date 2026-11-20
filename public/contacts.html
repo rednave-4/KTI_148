@@ -23,7 +23,7 @@
     <h1 style="color: var(--primary); margin-bottom: 0.5rem;">Direktori Kontak Unit Sekolah</h1>
     <p style="color: var(--text-light); margin-bottom: 1.5rem;">Nomor layanan resmi di lingkungan SMA Negeri 10 Samarinda.</p>
 
-    <div id="contacts-list" style="display: grid; gap: 1rem;">
+    <div id="contacts-list">
       <p style="color: var(--text-light);">Memuat data kontak...</p>
     </div>
   </main>
@@ -32,25 +32,8 @@
     <p>&copy; TIM KTI - 148: Jonathan Doxan P. ; Raphael Evander L.R. ; Zacky Ayyatullah</p>
   </footer>
 
+  <script src="/js/main.js"></script>
   <script src="/js/contacts.js"></script>
   <button id="theme-toggle" class="floating-theme-btn" aria-label="Ganti Tema">🌙</button>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const toggleBtn = document.getElementById('theme-toggle');
-      if (!toggleBtn) return;
-      const updateIcon = () => {
-        toggleBtn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
-      };
-      if (localStorage.getItem('theme') === 'dark') {
-        document.documentElement.classList.add('dark');
-      }
-      updateIcon();
-      toggleBtn.addEventListener('click', () => {
-        document.documentElement.classList.toggle('dark');
-        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-        updateIcon();
-      });
-    });
-  </script>
 </body>
 </html>

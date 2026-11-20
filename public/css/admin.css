@@ -1,0 +1,32 @@
+/* Admin-specific extras on top of style.css */
+
+.admin-form label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.admin-form input,
+.admin-form textarea,
+.admin-form select {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.btn-danger {
+  background: #fee2e2;
+  color: #991b1b;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+html.dark .btn-danger {
+  background: #7f1d1d;
+  color: #fecaca;
+}

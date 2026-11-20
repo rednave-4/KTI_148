@@ -60,11 +60,17 @@ function setupThemeToggle() {
   const themeToggleBtn = document.getElementById('theme-toggle');
   if (!themeToggleBtn) return;
 
+  // Prevent double-binding if script is included more than once
+  if (themeToggleBtn.dataset.themeBound === '1') {
+    const isDark = document.documentElement.classList.contains('dark');
+    themeToggleBtn.textContent = isDark ? '☀️' : '🌙';
+    return;
+  }
+  themeToggleBtn.dataset.themeBound = '1';
+
   const updateThemeIcon = () => {
     const isDark = document.documentElement.classList.contains('dark');
-    if (themeToggleBtn.textContent.includes('🌙') || themeToggleBtn.textContent.includes('☀️')) {
-      themeToggleBtn.textContent = isDark ? '☀️' : '🌙';
-    }
+    themeToggleBtn.textContent = isDark ? '☀️' : '🌙';
   };
 
   updateThemeIcon();

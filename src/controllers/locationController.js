@@ -65,8 +65,13 @@ exports.getNavigationData = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // Ambil detail lokasi
-    const [locRows] = await pool.execute('SELECT * FROM locations WHERE location_id = ?', [id]);
+    // Ambil detail lokasi + nama parent
+    const [locRows] = await pool.execute(`
+      SELECT l.*, p.name AS parent_name
+      FROM locations l
+      LEFT JOIN locations p ON l.parent_location_id = p.location_id
+      WHERE l.location_id = ?
+    `, [id]);
     if (locRows.length === 0) {
       return res.status(404).json({ success: false, message: 'Lokasi tidak ditemukan.' });
     }

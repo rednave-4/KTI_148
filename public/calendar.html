@@ -96,25 +96,8 @@
     <p>&copy; TIM KTI - 148: Jonathan Doxan P. ; Raphael Evander L.R. ; Zacky Ayyatullah</p>
   </footer>
 
+  <script src="/js/main.js"></script>
   <script src="/js/calendar.js"></script>
   <button id="theme-toggle" class="floating-theme-btn" aria-label="Ganti Tema">🌙</button>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const toggleBtn = document.getElementById('theme-toggle');
-      if (!toggleBtn) return;
-      const updateIcon = () => {
-        toggleBtn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
-      };
-      if (localStorage.getItem('theme') === 'dark') {
-        document.documentElement.classList.add('dark');
-      }
-      updateIcon();
-      toggleBtn.addEventListener('click', () => {
-        document.documentElement.classList.toggle('dark');
-        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-        updateIcon();
-      });
-    });
-  </script>
 </body>
 </html>

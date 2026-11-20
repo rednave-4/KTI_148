@@ -8,7 +8,7 @@
 </head>
 <body>
   <nav class="navbar">
-    <a href="/" class="nav-brand">SMAN 10 Samarinda</a>
+    <a href="/" class="nav-brand">SMARIDASA</a>
     <ul class="nav-links">
       <li><a href="/">Beranda</a></li>
       <li><a href="/announcements.html">Pengumuman</a></li>
@@ -22,63 +22,30 @@
     <div id="detail-container" class="card">
       <p>Memuat detail pengumuman...</p>
     </div>
+
+    <!-- Bagian untuk menampilkan QR Code menuju tautan pengumuman ini -->
+    <div class="qr-container" style="margin-top: 2rem; text-align: center; padding: 1rem; border: 1px dashed var(--border); border-radius: 8px;">
+      <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.5rem;">Pindai QR Code ini untuk membuka pengumuman di perangkat seluler:</p>
+      <img id="qr-code-img" src="" alt="QR Code Pengumuman" style="width: 120px; height: 120px;">
+    </div>
   </main>
 
+  <script src="/js/main.js"></script>
   <script src="/js/announcement-detail.js"></script>
-
-  <!-- Tombol Toggle Tema -->
-  <button id="theme-toggle" class="floating-theme-btn" 
-    style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; 
-          width: 48px; height: 48px; border-radius: 50%; 
-          background-color: #1e293b; color: #f8fafc; 
-          border: none; cursor: pointer; 
-          box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-          font-size: 1.25rem; display: flex; align-items: center; justify-content: center;
-          transition: transform 0.2s, background-color 0.2s;">
-    🌙
-  </button>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const toggleBtn = document.getElementById('theme-toggle');
-      if (!toggleBtn) return;
-
-      function updateThemeIcon() {
-        const isDark = document.documentElement.classList.contains('dark');
-        toggleBtn.textContent = isDark ? '☀️' : '🌙';
-      }
-
-      // Terapkan tema tersimpan
-      const savedTheme = localStorage.getItem('theme') || 'light';
-      if (savedTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-      }
-      updateThemeIcon();
-
-      toggleBtn.addEventListener('click', () => {
-        document.documentElement.classList.toggle('dark');
-        const activeTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-        localStorage.setItem('theme', activeTheme);
-        updateThemeIcon();
-      });
-    });
-  </script>
-
-  <!-- Bagian untuk menampilkan QR Code menuju tautan pengumuman ini -->
-  <div class="qr-container" style="margin-top: 2rem; text-align: center; padding: 1rem; border: 1px dashed var(--border); border-radius: 8px;">
-    <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.5rem;">Pindai QR Code ini untuk membuka pengumuman di perangkat seluler:</p>
-    <img id="qr-code-img" src="" alt="QR Code Pengumuman" style="width: 120px; height: 120px;">
-  </div>
 
   <script>
     // Skrip otomatis untuk menghasilkan QR Code berdasarkan URL halaman saat ini
     const currentUrl = window.location.href;
     const qrImg = document.getElementById('qr-code-img');
-    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(currentUrl)}`;
+    if (qrImg) {
+      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(currentUrl)}`;
+    }
   </script>
 
   <footer>
     <p>&copy; 2026 SMAN 10 Samarinda - KTI: Sistem Informasi Pengumuman & Wayfinding SVG.</p>
   </footer>
+
+  <button id="theme-toggle" class="floating-theme-btn" aria-label="Ganti Tema">🌙</button>
 </body>
 </html>
