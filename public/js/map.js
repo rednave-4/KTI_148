@@ -80,6 +80,7 @@ function setupMapZoom() {
 
   window.addEventListener('mousemove', (e) => {
     if (!isPanning) return;
+    mapX = e.clientX - mapX;
     mapX = e.clientX - startX;
     mapY = e.clientY - startY;
     applyMapTransform();
@@ -117,6 +118,8 @@ async function initMapSystem() {
   const mapSelect = document.getElementById('map-select');
   const searchInput = document.getElementById('map-search-input');
 
+  if (!mapSelect) return;
+
   const initialSvgPath = mapSelect.options[mapSelect.selectedIndex].getAttribute('data-svg');
   await loadSvgMap(initialSvgPath);
 
@@ -125,7 +128,7 @@ async function initMapSystem() {
     await loadSvgMap(svgPath);
   });
 
-  setupSearch(searchInput);
+  if (searchInput) setupSearch(searchInput);
   setupMapZoom();
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -150,7 +153,6 @@ async function loadSvgMap(svgPath) {
     currentActiveElement = null;
     document.querySelectorAll('.map-location-highlight').forEach((n) => n.remove());
     resetMapTransform();
-    currentActiveElement = null;
     await bindSvgElements();
   } catch (error) {
     console.error('Gagal memuat peta SVG:', error);
@@ -163,6 +165,35 @@ async function loadSvgMap(svgPath) {
   }
 }
 
+function isGenericSvgId(id) {
+  if (!id) return true;
+  return (
+    id.startsWith('path') ||
+    id.startsWith('rect') ||
+    id.startsWith('layer') ||
+    id.startsWith('svg') ||
+    id.startsWith('defs') ||
+    id.startsWith('clip') ||
+    id.startsWith('filter') ||
+    id.startsWith('linear') ||
+    id.startsWith('stop') ||
+    id.startsWith('lpe_') ||
+    id.startsWith('text') ||
+    id.startsWith('tspan') ||
+    id === 'UNIDENTIFIED' ||
+    (id.startsWith('g') && id.length <= 5)
+  );
+}
+
+function findMeaningfulTarget(el) {
+  const selector =
+    '[id^="Gedung-"], [id^="building-"], [id^="room-"], [id^="Ruang-"], [id^="Ruangan-"], ' +
+    '[id^="facility-"], [id^="Lapangan-"], [id^="Masjid-"], [id^="Parkiran-"], [id^="Pos-"], ' +
+    '[id^="Wisma-"], [id^="WIsma-"], [id^="Toilet-"], [id^="Tangga-"], [id^="OSN-"], [id^="Unit-"]';
+
+  return el.closest(selector) || el;
+}
+
 async function bindSvgElements() {
   try {
     const svgRoot = document.querySelector('#svg-container svg');
@@ -172,52 +203,19 @@ async function bindSvgElements() {
 
     allElements.forEach((el) => {
       const elementId = el.getAttribute('id');
-      if (!elementId) return;
-
-      if (
-        elementId.startsWith('path') ||
-        elementId.startsWith('rect') ||
-        elementId.startsWith('layer') ||
-        elementId.startsWith('svg') ||
-        elementId.startsWith('defs') ||
-        elementId.startsWith('clipPath') ||
-        elementId.startsWith('filter') ||
-        elementId.startsWith('linearGradient') ||
-        elementId.startsWith('stop') ||
-        elementId.startsWith('lpe_') ||
-        (elementId.startsWith('g') && elementId.length <= 5)
-      ) {
-        return;
-      }
+      if (isGenericSvgId(elementId)) return;
 
       el.classList.add('map-location');
 
       el.addEventListener('click', (e) => {
         e.stopPropagation();
 
-        let targetEl = el;
-
-        if (el.tagName.toLowerCase() !== 'g') {
-          const parentGroup = el.closest('g[id]');
-          if (parentGroup) {
-            const parentId = parentGroup.getAttribute('id') || '';
-            const isGeneric =
-              parentId.startsWith('path') ||
-              parentId.startsWith('layer') ||
-              (parentId.startsWith('g') && parentId.length <= 5);
-
-            if (parentId && !isGeneric) {
-              targetEl = parentGroup;
-            }
-          }
-        }
-
-        const meaningful =
-          targetEl.closest('[id^="Gedung-"], [id^="building-"], [id^="room-"], [id^="facility-"], [id^="Lapangan-"], [id^="Masjid-"], [id^="Parkiran-"], [id^="Pos-"], [id^="Wisma-"]') ||
-          targetEl;
+        const meaningful = findMeaningfulTarget(el);
+        const id = meaningful.getAttribute('id');
+        if (!id || isGenericSvgId(id)) return;
 
         highlightSvgElement(meaningful);
-        fetchLocationDetailBySvgId(meaningful.getAttribute('id'));
+        fetchLocationDetailBySvgId(id);
       });
     });
   } catch (err) {
@@ -246,10 +244,10 @@ function highlightSvgElement(el) {
     const rect = document.createElementNS(ns, 'rect');
 
     rect.setAttribute('class', 'map-location-highlight');
-    rect.setAttribute('x', bbox.x - 6);
-    rect.setAttribute('y', bbox.y - 6);
-    rect.setAttribute('width', bbox.width + 12);
-    rect.setAttribute('height', bbox.height + 12);
+    rect.setAttribute('x', String(bbox.x - 6));
+    rect.setAttribute('y', String(bbox.y - 6));
+    rect.setAttribute('width', String(bbox.width + 12));
+    rect.setAttribute('height', String(bbox.height + 12));
     rect.setAttribute('fill', 'none');
     rect.setAttribute('stroke', '#f59e0b');
     rect.setAttribute('stroke-width', '5');
@@ -259,8 +257,6 @@ function highlightSvgElement(el) {
     rect.style.filter = 'drop-shadow(0 0 10px rgba(245, 158, 11, 0.9))';
 
     svg.appendChild(rect);
-
-    el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
   } catch (err) {
     console.warn('Gagal membuat highlight:', err);
   }
@@ -275,20 +271,23 @@ async function fetchLocationDetailBySvgId(svgElementId) {
   if (!svgElementId) return;
 
   try {
-    const response = await fetch(`/api/locations/search?q=${encodeURIComponent(svgElementId)}`);
+    // Endpoint yang benar: by-svg
+    const response = await fetch(`/api/locations/by-svg/${encodeURIComponent(svgElementId)}`);
     const result = await response.json();
 
-    if (result.success && result.data && result.data.length > 0) {
-      let loc = result.data.find((item) => item.svg_element_id === svgElementId);
-      if (!loc) loc = result.data[0];
-
+    if (result.success && result.data) {
+      const loc = result.data;
       typeBadge.innerText = loc.location_type || 'LOKASI';
       titleEl.innerText = loc.name;
       descEl.innerText = loc.description || 'Tidak ada deskripsi tambahan.';
       renderLocationPhoto(loc.photo_url);
-      extraEl.innerHTML = loc.parent_name
-        ? `<p style="font-size: 0.85rem; color: var(--text-light);"><strong>Gedung/Area:</strong> ${escapeHtml(loc.parent_name)}</p>`
-        : '';
+
+      // Parent: sembunyikan jika hanya nama sekolah
+      if (loc.parent_name && loc.parent_name !== 'SMA Negeri 10 Samarinda') {
+        extraEl.innerHTML = `<p style="font-size: 0.85rem; color: var(--text-light);"><strong>Bagian dari:</strong> ${escapeHtml(loc.parent_name)}</p>`;
+      } else {
+        extraEl.innerHTML = '';
+      }
     } else {
       typeBadge.innerText = 'LOKASI';
       titleEl.innerText = svgElementId.replace(/-/g, ' ').toUpperCase();
@@ -308,6 +307,8 @@ async function fetchLocationDetailBySvgId(svgElementId) {
 
 function setupSearch(searchInput) {
   const dropdown = document.getElementById('search-results');
+  if (!dropdown) return;
+
   let debounceTimeout = null;
 
   searchInput.addEventListener('input', (e) => {
@@ -377,7 +378,7 @@ async function navigateToLocationItem(item) {
     await new Promise((r) => requestAnimationFrame(r));
     let el = document.getElementById(item.svg_element_id);
     if (!el) {
-      await new Promise((r) => setTimeout(r, 50));
+      await new Promise((r) => setTimeout(r, 80));
       el = document.getElementById(item.svg_element_id);
     }
     if (el) highlightSvgElement(el);
@@ -393,9 +394,11 @@ async function navigateToLocationItem(item) {
   if (descEl) descEl.innerText = item.description || 'Tidak ada deskripsi tambahan.';
   renderLocationPhoto(item.photo_url);
   if (extraEl) {
-    extraEl.innerHTML = item.parent_name
-      ? `<p style="font-size: 0.85rem; color: var(--text-light);"><strong>Gedung/Area:</strong> ${escapeHtml(item.parent_name)}</p>`
-      : '';
+    if (item.parent_name && item.parent_name !== 'SMA Negeri 10 Samarinda') {
+      extraEl.innerHTML = `<p style="font-size: 0.85rem; color: var(--text-light);"><strong>Bagian dari:</strong> ${escapeHtml(item.parent_name)}</p>`;
+    } else {
+      extraEl.innerHTML = '';
+    }
   }
 }
 
@@ -431,9 +434,10 @@ async function navigateToLocationId(locationId) {
       document.getElementById('info-description').innerText =
         loc.description || 'Detail lokasi tersedia, tetapi elemen denah belum dipetakan.';
       renderLocationPhoto(loc.photo_url);
-      document.getElementById('info-extra').innerHTML = loc.parent_name
-        ? `<p style="font-size: 0.85rem; color: var(--text-light);"><strong>Gedung/Area:</strong> ${escapeHtml(loc.parent_name)}</p>`
-        : '';
+      document.getElementById('info-extra').innerHTML =
+        loc.parent_name && loc.parent_name !== 'SMA Negeri 10 Samarinda'
+          ? `<p style="font-size: 0.85rem; color: var(--text-light);"><strong>Bagian dari:</strong> ${escapeHtml(loc.parent_name)}</p>`
+          : '';
     }
   } catch (err) {
     console.error('Gagal melakukan navigasi otomatis dari URL:', err);
